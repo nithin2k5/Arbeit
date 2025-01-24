@@ -1,14 +1,15 @@
 'use client';
 import { useState } from 'react';
-import { FiUser, FiSettings, FiFileText, FiFolder } from 'react-icons/fi';
+import { FiUser, FiSettings, FiFileText, FiFolder, FiArrowLeft } from 'react-icons/fi';
 import './page.css';
+import { useRouter } from 'next/navigation';
 
 import GeneralSettings from './components/GeneralSettings';
 import JobPreferences from './components/JobPreferences';
 import MyApplications from './components/MyApplications';
 import ProfileSettings from './components/ProfileSettings';
 import DeleteModal from './components/DeleteModal';
-
+    
 const demoUser = {
   name: 'John Doe',
   email: 'john.doe@example.com',
@@ -19,12 +20,17 @@ const demoUser = {
 };
 
 export default function SettingsPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('settings');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const handleDeleteAccount = () => {
     // Handle account deletion logic here
     setShowDeleteModal(false);
+  };
+
+  const GoToDashboard = () => {
+    router.push('/dashboard');
   };
 
   return (
@@ -39,6 +45,9 @@ export default function SettingsPage() {
             </div>
             <span>{demoUser.name}</span>
           </div>
+          <button onClick={GoToDashboard} className="back-button">
+            <FiArrowLeft />
+          </button>
         </div>
       </header>
 

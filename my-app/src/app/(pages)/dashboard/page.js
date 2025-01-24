@@ -84,6 +84,14 @@ export default function DashboardPage() {
           <button className="action-button">ATS Scanner</button>
           <div className="profile-button">
             <i className="fas fa-user"></i>
+            <div className="profile-dropdown">
+              <button onClick={() => router.push('/dashboard/settings')} className="dropdown-item">
+                Settings
+              </button>
+              <button onClick={() => router.push('/auth')} className="dropdown-item">
+                Log out
+              </button>
+            </div>
           </div>
         </div>
       </header>
