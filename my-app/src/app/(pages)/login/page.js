@@ -17,7 +17,7 @@ export default function AuthPage() {
     setLoading(true);
     try {
       await signInWithGoogle();
-      router.replace('/demo');
+      router.replace('/');
     } catch (err) {
       setError('Failed to sign in with Google');
     } finally {
@@ -42,7 +42,7 @@ export default function AuthPage() {
       }
 
       const data = await response.json();
-      router.replace('/demo');
+      router.replace('/');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {

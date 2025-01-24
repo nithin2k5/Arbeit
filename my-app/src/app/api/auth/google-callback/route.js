@@ -18,7 +18,7 @@ export async function GET(request) {
 
     if (!code) {
       console.error('No code provided in callback');
-      return NextResponse.redirect('/login?error=No_code_provided');
+      return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login?error=No_code_provided`);
     }
 
     // Exchange code for tokens
@@ -83,16 +83,16 @@ export async function GET(request) {
         path: '/',
       };
 
-      const response = NextResponse.redirect('/demo');
+      const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/demo`);
       
       response.cookies.set('accessToken', accessToken, {
         ...cookieOptions,
-        maxAge: 15 * 60,  // 15 minutes in seconds
+        maxAge: 15,  // 15 minutes in seconds
       });
 
       response.cookies.set('refreshToken', refreshToken, {
         ...cookieOptions,
-        maxAge: 7 * 24 * 60 * 60,  // 7 days in seconds
+        maxAge: 45,  // 7 days in seconds
       });
 
       return response;
@@ -116,11 +116,6 @@ export async function GET(request) {
         : 'Authentication failed'
     );
     
-    return NextResponse.redirect(`/login?error=${errorMessage}`);
-  }
-} 
-    const url = new URL('/login', BASE_URL);
-    url.searchParams.set('error', errorMessage);
-    return NextResponse.redirect(url);
+    return NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/login?error=${errorMessage}`);
   }
 } 
