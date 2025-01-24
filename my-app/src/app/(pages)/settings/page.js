@@ -28,10 +28,26 @@ const ProfilePage = () => {
     workType: 'Full Time', // Full Time, Contract, Freelance
     experienceLevel: 'Mid Level', // Junior, Mid Level, Senior
     primaryRole: 'Frontend Developer',
+    // Initialize all array fields
     languages: [],
     frameworks: [],
     databases: [],
-    tools: []
+    tools: [],
+    // Initialize all string fields with empty strings
+    phone: '',
+    location: '',
+    company: '',
+    position: '',
+    website: '',
+    // Initialize all number fields with empty strings (will be converted to numbers on submit)
+    yearsOfExperience: '',
+    // Initialize all date fields with empty strings
+    startDate: '',
+    endDate: '',
+    // Initialize all boolean fields with false
+    isCurrentlyEmployed: false,
+    isOpenToWork: false,
+    isRemoteOnly: false
   });
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -45,6 +61,7 @@ const ProfilePage = () => {
     tools: ['Git', 'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP', 'Jenkins', 'JIRA', 'Figma']
   };
 
+  // Initialize userProfile with user email when available
   useEffect(() => {
     if (user?.email) {
       setUserProfile(prev => ({
@@ -54,43 +71,65 @@ const ProfilePage = () => {
     }
   }, [user?.email]);
 
+  // Fetch profile data only when user is authenticated
   useEffect(() => {
-    if (user) {
-      // Fetch user profile data
-      const fetchProfile = async () => {
-        try {
-          const response = await fetch('/api/profile');
-          if (response.ok) {
-            const data = await response.json();
-            setUserProfile(prev => ({
-              ...prev,
-              ...data,
-              email: user.email // Ensure email stays from user context
-            }));
-          }
-        } catch (error) {
-          console.error('Error fetching profile:', error);
-        }
-      };
+    const fetchData = async () => {
+      if (!user || !user.email) {
+        setLoading(false);
+        return;
+      }
 
-      // Fetch user applications
-      const fetchApplications = async () => {
-        try {
-          const response = await fetch('/api/applications');
-          if (response.ok) {
-            const data = await response.json();
-            setApplications(data);
-          }
-        } catch (error) {
-          console.error('Error fetching applications:', error);
-        } finally {
-          setLoading(false);
+      try {
+        // Fetch profile
+        const profileResponse = await fetch('/api/profile');
+        if (profileResponse.ok) {
+          const profileData = await profileResponse.json();
+          // Ensure all fields have at least default values
+          setUserProfile(prev => ({
+            ...prev, // Keep default values
+            ...profileData, // Override with server data
+            email: user.email, // Always use email from auth context
+            // Ensure arrays are initialized
+            languages: profileData.languages || [],
+            frameworks: profileData.frameworks || [],
+            databases: profileData.databases || [],
+            tools: profileData.tools || [],
+            // Ensure strings are initialized
+            fullName: profileData.fullName || '',
+            phone: profileData.phone || '',
+            title: profileData.title || '',
+            bio: profileData.bio || '',
+            githubProfile: profileData.githubProfile || '',
+            linkedinProfile: profileData.linkedinProfile || '',
+            portfolioWebsite: profileData.portfolioWebsite || '',
+            preferredWorkLocation: profileData.preferredWorkLocation || '',
+            // Ensure select fields have valid values
+            workType: profileData.workType || 'Full Time',
+            experienceLevel: profileData.experienceLevel || 'Mid Level',
+            primaryRole: profileData.primaryRole || 'Frontend Developer',
+            // Ensure number fields are initialized
+            yearsOfExperience: profileData.yearsOfExperience || '',
+            // Ensure boolean fields are initialized
+            isCurrentlyEmployed: profileData.isCurrentlyEmployed || false,
+            isOpenToWork: profileData.isOpenToWork || false,
+            isRemoteOnly: profileData.isRemoteOnly || false
+          }));
         }
-      };
 
-      fetchProfile();
-      fetchApplications();
-    }
+        // Fetch applications
+        const applicationsResponse = await fetch('/api/applications');
+        if (applicationsResponse.ok) {
+          const applicationsData = await applicationsResponse.json();
+          setApplications(applicationsData);
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
   }, [user]);
 
   const handleInputChange = (e) => {
@@ -193,31 +232,38 @@ const ProfilePage = () => {
 
   const handleProfileUpdate = async (e) => {
     e.preventDefault();
-    const updatePromise = fetch('/api/profile', {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userProfile)
-    });
+    
+    if (!user) {
+      toast.error('Please log in to update your profile');
+      return;
+    }
+    
+    // Remove sensitive fields
+    const { email, currentPassword, newPassword, confirmPassword, ...profileData } = userProfile;
 
     try {
-      toast.promise(
+      const updatePromise = fetch('/api/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        credentials: 'include', // Include cookies in the request
+        body: JSON.stringify(profileData)
+      });
+
+      await toast.promise(
         updatePromise,
         {
           loading: 'Updating profile...',
           success: 'Profile updated successfully!',
-          error: (err) => {
-            const errorMessage = err?.message || 'Failed to update profile';
-            return errorMessage;
-          },
+          error: (err) => err?.message || 'Failed to update profile',
         },
         {
           style: {
             minWidth: '250px',
           },
           success: {
-            duration: 5000,
+            duration: 3000,
             icon: '✅',
           },
           error: {
@@ -228,9 +274,8 @@ const ProfilePage = () => {
       );
 
       const response = await updatePromise;
-      const data = await response.json();
-
       if (!response.ok) {
+        const data = await response.json();
         throw new Error(data.error || 'Failed to update profile');
       }
     } catch (error) {
