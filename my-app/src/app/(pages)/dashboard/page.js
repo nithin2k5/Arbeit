@@ -101,7 +101,7 @@ export default function Dashboard() {
           <div className="profile-button">
             <i className="fas fa-user"></i>
             <div className="profile-dropdown">
-              <button onClick={() => router.push('/dashboard/settings')} className="dropdown-item">
+              <button onClick={() => router.push('/settings')} className="dropdown-item">
                 Settings
               </button>
               <button onClick={() => router.push('/auth')} className="dropdown-item">
