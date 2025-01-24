@@ -1,4 +1,4 @@
-import {connect, disconnect} from '../../../config/db';
+import {connect, disconnect} from '../../../../config/db';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request) {

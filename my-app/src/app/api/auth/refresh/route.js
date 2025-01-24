@@ -1,30 +1,58 @@
-import { NextResponse } from 'next/server';
+import { verifyRefreshToken, generateAccessToken } from "../../../../config/jwt";
+import { cookies } from 'next/headers';
 
 export async function GET(request) {
-  try {
-    const token = request.cookies.get('token')?.value;
+    try {
+        const cookieStore = await cookies();
+        const refreshToken = await cookieStore.get('refreshToken');
 
-    if (!token) {
-      return NextResponse.json(
-        { message: 'No token found' },
-        { status: 401 }
-      );
+        if (!refreshToken) {
+            await cookieStore.delete('accessToken');
+            await cookieStore.delete('refreshToken');
+            return Response.json({ error: 'No refresh token found' }, { status: 401 });
+        }
+
+        try {
+            const decoded = verifyRefreshToken(refreshToken.value);
+            if (!decoded) {
+                await cookieStore.delete('accessToken');
+                await cookieStore.delete('refreshToken');
+                return Response.json({ error: 'Invalid refresh token' }, { status: 401 });
+            }
+
+            // Generate new access token with role
+            const newAccessToken = generateAccessToken({ 
+                username: decoded.username,
+                role: decoded.role || 'user'  // Maintain role information
+            });
+            
+            // Set the new access token cookie
+            await cookieStore.set('accessToken', newAccessToken, {
+                httpOnly: true,
+                secure: process.env.NODE_ENV === 'production',
+                sameSite: 'lax',
+                maxAge: 15  // 15 seconds
+            });
+
+            return Response.json({
+                message: 'Access Token Refreshed',
+                user: {
+                    username: decoded.username,
+                    role: decoded.role || 'user'  // Include role in response
+                }
+            }, { status: 200 });
+        } catch (tokenError) {
+            // Handle JWT verification errors
+            console.error('Token verification error:', tokenError);
+            await cookieStore.delete('accessToken');
+            await cookieStore.delete('refreshToken');
+            return Response.json({ error: 'Refresh token expired' }, { status: 401 });
+        }
+    } catch (error) {
+        console.error('Refresh token error:', error);
+        const cookieStore = await cookies();
+        await cookieStore.delete('accessToken');
+        await cookieStore.delete('refreshToken');
+        return Response.json({ error: 'Internal Server Error' }, { status: 500 });
     }
-
-    // Verify token and get user data
-    // Add your token verification logic here
-
-    return NextResponse.json(
-      { 
-        message: 'Token refreshed',
-        user: { /* user data */ } 
-      },
-      { status: 200 }
-    );
-  } catch (error) {
-    return NextResponse.json(
-      { message: error.message || 'Token refresh failed' },
-      { status: 401 }
-    );
-  }
-} 
+}

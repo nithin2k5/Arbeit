@@ -21,17 +21,7 @@ export default function AuthPage() {
       const email = e.target.email.value;
       const password = e.target.password.value;
       
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          Username: email,
-          Password: password
-        }),
-        credentials: 'include',
-      });
+      const response = await login(email, password);
 
       if (!response.ok) {
         const data = await response.json();
@@ -62,16 +52,8 @@ export default function AuthPage() {
         return;
       }
 
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          Username: email,
-          Password: password
-        }),
-      });
+      const response = await register(email, password);
+      
 
       if (!response.ok) {
         const data = await response.json();
@@ -153,7 +135,7 @@ export default function AuthPage() {
             </div>
 
             <form className="auth-form" onSubmit={isLogin ? handleLogin : handleSignup}>
-              {!isLogin && (
+              {/* {!isLogin && (
                 <div className="form-group">
                   <label htmlFor="name">Full Name</label>
                   <input
@@ -163,7 +145,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
-              )}
+              )} */}
 
               <div className="form-group">
                 <label htmlFor="email">Email</label>
