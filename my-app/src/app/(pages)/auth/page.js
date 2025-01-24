@@ -1,9 +1,9 @@
 "use client";
 import React, { useState } from 'react';
 import './page.css';
-import Image from 'next/image';
 import { useAuth } from "../../../context/AuthContext"
 import { useRouter } from 'next/navigation';
+import { Toaster, toast } from 'react-hot-toast';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -35,10 +35,12 @@ export default function AuthPage() {
 
       if (!response.ok) {
         const data = await response.json();
+        toast.error(data.error || 'Login failed');
         throw new Error(data.error || 'Login failed');
       }
 
       const data = await response.json();
+      toast.success('Login successful!');
       router.replace('/demo');
     } catch (err) {
       setError(err.message || 'Failed to login');
@@ -58,6 +60,7 @@ export default function AuthPage() {
       const confirmPassword = e.target.confirmPassword.value;
 
       if (password !== confirmPassword) {
+        toast.error('Passwords do not match');
         setError('Passwords do not match');
         return;
       }
@@ -75,9 +78,11 @@ export default function AuthPage() {
 
       if (!response.ok) {
         const data = await response.json();
+        toast.error(data.error || 'Registration failed');
         throw new Error(data.error || 'Registration failed');
       }
 
+      toast.success('Account created successfully!');
       setIsLogin(true);
     } catch (err) {
       setError(err.message || 'Failed to create account');
@@ -88,33 +93,23 @@ export default function AuthPage() {
 
   return (
     <div className="auth-container">
-      <div className="background-grid" /> 
       <div className="split-container">
         <div className="animated-side">
-          <div className="animated-circles">
-            <div className="circle circle-1"></div>
-            <div className="circle circle-2"></div>
-            <div className="circle circle-3"></div>
+          <div className="absolute top-0 -z-10 h-full w-full bg-white">
+            <div className="absolute bottom-auto left-auto right-0 top-0 h-[500px] w-[500px] -translate-x-[30%] translate-y-[20%] rounded-full bg-[rgba(173,109,244,0.5)] opacity-50 blur-[80px]"></div>
           </div>
           <div className="brand-content">
             <div className="logo">
-              {/* <span className="logo-prefix">by ZeroOne CodeClub</span>
-              <span className="logo-main">WorkSpace</span> */}
-              <span className=" logo-main ">Arbeit</span>
-              <span className="logo-prefix">by ZeroOne CodeClub</span>
+              <span className="logo-main">Arbeit</span>
             </div>
-            <h1 className="animated-title">
-              {/* <span className="gradient-text">Develop.</span>
-              <span className="gradient-text">Collaborate.</span>
-              <span className="gradient-text">Succeed.</span> */}
-              <Image className="gradient-text" priority alt='job' src="./job.svg" width={100} height={100}></Image>
-            </h1>
-            <p className="animated-subtitle">Your journey to better productivity starts here</p>
-          </div>
-          <div className="animated-shapes">
-            <div className="shape shape-1"></div>
-            <div className="shape shape-2"></div>
-            <div className="shape shape-3"></div>
+            <div className="hero-text">
+              <h1>
+                <span className="text-gradient">Organize</span>
+                <span className="text-gradient">Track</span>
+                <span className="text-gradient">Succeed</span>
+              </h1>
+              <p className="hero-subtitle">Your journey to better productivity starts here</p>
+            </div>
           </div>
         </div>
 
@@ -232,6 +227,29 @@ export default function AuthPage() {
           </div>
         </div>
       </div>
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: 'var(--background)',
+            color: 'var(--text-color)',
+            border: '1px solid var(--border-color)',
+          },
+          success: {
+            iconTheme: {
+              primary: 'var(--primary-color)',
+              secondary: 'white',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: 'white',
+            },
+          },
+        }}
+      />
     </div>
   );
 } 

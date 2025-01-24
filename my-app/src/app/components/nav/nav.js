@@ -67,7 +67,7 @@ export default function Nav() {
 
           <div className="flex items-center space-x-4">
             <Link
-              href="/login"
+              href="/auth"
               className={`${
                 isScrolled ? 'text-gray-600' : 'text-gray-800'
               } hover:text-blue-600 transition-colors`}
@@ -75,7 +75,7 @@ export default function Nav() {
               Login
             </Link>
             <Link
-              href="/register"
+              href="/auth"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-colors shadow-lg hover:shadow-xl"
             >
               Sign Up
