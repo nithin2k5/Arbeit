@@ -1,23 +1,23 @@
-import {connect, disconnect} from '../../../config/db';
+import {connect, disconnect} from '../../../../config/db';
 import bcrypt from 'bcryptjs';
 
 export async function POST(request) {
     try{
-        const {Username, Password} = await request.json();
+        const {email, Password} = await request.json();
 
         const db= await connect();
         const collection = db.collection('users');
 
-        const existingUser=await collection.findOne({Username});
+        const existingUser=await collection.findOne({email});
 
         if(existingUser) 
             return Response.json({
-                error:'Username already Exists'
+                error:'Email already Exists'
             }, {status:400});
         
         const hashPassword=await bcrypt.hash(Password,10);
         const newUsr={
-            Username,
+            email,
             Password: hashPassword,
             role: 'user'  // Set default role for new users
         };

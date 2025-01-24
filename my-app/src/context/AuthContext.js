@@ -1,100 +1,179 @@
 "use client";
-import { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useContext, useState, useEffect, createContext } from "react";
+import { useRouter } from "next/navigation";
+const AuthContext = createContext();
 
-const AuthContext = createContext({});
+export function AuthProvider({children}) {
+    const [user, setUser] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const router = useRouter();
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const router = useRouter();
+    // Initial auth check
+    useEffect(() => {
+        const checkAuth = async () => {
+            try {
+                const response = await refreshToken();
+                const data = await response.json();
+                if (response.ok) {
+                    setUser(data.user);
+                }
+            } catch (error) {
+                console.error('Auth check failed:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        checkAuth();
+    }, []);
 
-  useEffect(() => {
-    checkAuth();
-  }, []);
+    // Handle token refresh
+    useEffect(() => {
+        let intervalId;
 
-  const checkAuth = async () => {
-    try {
-      const response = await fetch('/api/auth/refresh', {
-        method: 'GET',
-        credentials: 'include',
-      });
-      
-      if (response.ok) {
-        const data = await response.json();
-        setUser(data.user);
-      }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-    } finally {
-      setLoading(false);
+        if (user) {
+            intervalId = setInterval(async () => {
+                try {
+                    const response = await refreshToken();
+                    const data = await response.json();
+                    if (!response.ok) {
+                        clearInterval(intervalId);
+                        setUser(null);
+                        router.replace('/');
+                    } else {
+                        setUser(data.user);
+                    }
+                } catch (error) {
+                    console.error('Token refresh failed:', error);
+                    clearInterval(intervalId);
+                    setUser(null);
+                    router.replace('/');
+                }
+            }, 14 * 1000);
+        }
+
+        return () => {
+            if (intervalId) clearInterval(intervalId);
+        };
+    }, [user, router]);
+
+    const login = async(email, password) => {
+        try {
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, Password: password }),
+            });
+
+            if (!response.ok) {
+                return response;
+            }
+
+            return response;
+        } catch(e) {
+            return new Response(JSON.stringify({ error: 'Network error during login' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
     }
-  };
 
-  const login = async (email, password) => {
-    try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-        credentials: 'include',
-      });
+    const logout = async() => {
+        try{
+            const response = await fetch('/api/auth/logout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+            });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
-      }
+            if (response.ok) {
+                setUser(null);  // Clear user state
+                router.replace('/');  // Redirect to login page
+            }
 
-      const data = await response.json();
-      setUser(data.user);
-      return data;
-    } catch (error) {
-      throw error;
+            return response;
+        } catch(e) {
+            return new Response(JSON.stringify({ error: 'Network error during logout' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    }   
+
+    const register = async(email, password) => {
+        try {
+            const response = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, Password: password }),
+            });
+
+            if (!response.ok) {
+                return response;
+            }
+
+            return response;
+        } catch(e) {
+            return new Response(JSON.stringify({ error: 'Network error during registration' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
     }
-  };
 
-  const register = async (email, password) => {
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
-      });
+    const refreshToken = async () => {
+        try {
+            const response = await fetch("/api/auth/refresh", {
+                method: "GET",
+                headers: { "Content-Type": "application/json" },
+            });
+    
+            if (!response.ok) {
+                return new Response(JSON.stringify({ error: 'Token refresh failed' }), {
+                    status: response.status,
+                    headers: { 'Content-Type': 'application/json' }
+                });
+            }
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
-      }
+            return response;
+        } catch (error) {
+            // Return a proper JSON response even for network errors
+            return new Response(JSON.stringify({ error: 'Network error during refresh' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    };
 
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      throw error;
-    }
-  };
+    const signInWithGoogle = async () => {
+        try {
+            const response = await fetch('/api/auth/google-signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Google sign-in failed:', errorData);
+                throw new Error(errorData.error || 'Failed to sign in with Google');
+            }
 
-  const logout = async () => {
-    try {
-      await fetch('/api/auth/logout', {
-        method: 'POST',
-        credentials: 'include',
-      });
-      setUser(null);
-      router.replace('/login');
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+            const data = await response.json();
+            // Redirect to Google OAuth consent screen
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Failed to initialize Google sign in:', error);
+            throw error;
+        }
+    };
 
-  return (
-    <AuthContext.Provider value={{ user, login, register, logout, loading }}>
-      {!loading && children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={{ user, isLoading, login, register, setUser, logout, signInWithGoogle }}>
+            {children}
+        </AuthContext.Provider> 
+    );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+    return useContext(AuthContext);
+}

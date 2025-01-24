@@ -1,34 +1,69 @@
-import { NextResponse } from 'next/server';
+import {connect, disconnect} from '../../../../config/db';
+import bcrypt from 'bcryptjs';
+import { generateAuthTokens } from '../../../../config/jwt';
+import { cookies } from 'next/headers';
 
 export async function POST(request) {
-  try {
-    const { email, password } = await request.json();
+    try {
+        const { email, Password } = await request.json();
 
-    // Add your authentication logic here
-    // For example, verify credentials against your database
-    
-    // If authentication successful, create and set tokens
-    const response = NextResponse.json(
-      { 
-        message: 'Login successful',
-        user: { email } 
-      },
-      { status: 200 }
-    );
+        const db = await connect();
+        const collection = db.collection('users');
 
-    // Set HTTP-only cookie
-    response.cookies.set('token', 'your-jwt-token', {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 7 * 24 * 60 * 60, // 1 week
-    });
+        const existingUser = await collection.findOne({ email });
 
-    return response;
-  } catch (error) {
-    return NextResponse.json(
-      { message: error.message || 'Login failed' },
-      { status: 400 }
-    );
-  }
-} 
+        if (!existingUser) {
+            return Response.json({
+                error: 'Email does not exist'
+            }, { status: 400 });
+        }
+        
+        const hashPassword = await bcrypt.compare(Password, existingUser.Password);
+
+        if (!hashPassword) {
+            return Response.json({
+                error: 'Invalid Password'
+            }, { status: 400 });
+        }
+        
+        const { accessToken, refreshToken } = generateAuthTokens({ 
+            username: email,
+            role: existingUser.role || 'user'  // Default to 'user' if role not set
+        });
+        
+        // Get cookies instance
+        const cookieStore = await cookies();
+        
+        // Set access token cookie
+        await cookieStore.set('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 15  // 15 seconds
+        });
+
+        // Set refresh token cookie
+        await cookieStore.set('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 45  // 45 seconds
+        });
+
+        return Response.json({
+            message: "User Successfully Logged In",
+            user: {
+                email: email,
+                id: existingUser._id.toString(),
+                role: existingUser.role || 'user'  // Include role in response
+            }
+        }, { status: 200 });
+        
+    } catch (err) {
+        return Response.json({
+            error: err.message
+        }, { status: 500 });
+    } finally {
+        await disconnect();
+    }
+}

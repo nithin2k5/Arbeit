@@ -9,8 +9,21 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      router.replace('/');
+    } catch (err) {
+      setError('Failed to sign in with Google');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -21,17 +34,7 @@ export default function AuthPage() {
       const email = e.target.email.value;
       const password = e.target.password.value;
       
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          Username: email,
-          Password: password
-        }),
-        credentials: 'include',
-      });
+      const response = await login(email, password);
 
       if (!response.ok) {
         const data = await response.json();
@@ -41,7 +44,7 @@ export default function AuthPage() {
 
       const data = await response.json();
       toast.success('Login successful!');
-      router.replace('/demo');
+      router.replace('/');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {
@@ -65,16 +68,8 @@ export default function AuthPage() {
         return;
       }
 
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          Username: email,
-          Password: password
-        }),
-      });
+      const response = await register(email, password);
+      
 
       if (!response.ok) {
         const data = await response.json();
@@ -130,6 +125,25 @@ export default function AuthPage() {
               </div>
             )}
 
+            <button 
+              className="google-auth-btn" 
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <Image 
+                src="/google.svg" 
+                alt="Google" 
+                width={20} 
+                height={20}
+                priority
+              />
+              Continue with Google
+            </button>
+
+            <div className="auth-divider">
+              <span>or</span>
+            </div>
+
             <div className="auth-tabs">
               <button 
                 className={`auth-tab ${isLogin ? 'active' : ''}`}
@@ -148,7 +162,7 @@ export default function AuthPage() {
             </div>
 
             <form className="auth-form" onSubmit={isLogin ? handleLogin : handleSignup}>
-              {!isLogin && (
+              {/* {!isLogin && (
                 <div className="form-group">
                   <label htmlFor="name">Full Name</label>
                   <input
@@ -158,7 +172,7 @@ export default function AuthPage() {
                     required
                   />
                 </div>
-              )}
+              )} */}
 
               <div className="form-group">
                 <label htmlFor="email">Email</label>
