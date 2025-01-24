@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './page.css';
 
 export default function BusinessDashboard() {
@@ -9,54 +9,29 @@ export default function BusinessDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [departmentFilter, setDepartmentFilter] = useState('all');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const [newJob, setNewJob] = useState({
     title: '',
+    company: '',
+    logo: '',
     jobType: 'Full Time',
-    qualification: '',
-    department: '',
     location: '',
     salaryMin: '',
     salaryMax: '',
     hideSalary: false,
-    hiringProcess: [],
     description: '',
-    requirements: '',
+    requirements: [],
+    benefits: [],
+    screeningQuestions: [],
+    hiringProcess: [],
+    department: '',
+    qualification: '',
     additionalInfo: '',
   });
 
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: 'Senior Software Engineer',
-      department: 'Engineering',
-      jobType: 'Full Time',
-      qualification: 'Bachelor\'s in Computer Science',
-      location: 'Remote',
-      salaryMin: '80000',
-      salaryMax: '120000',
-      hideSalary: false,
-      hiringProcess: ['Face to Face', 'Technical Test'],
-      status: 'Active',
-      applicants: 12,
-      posted: '2024-03-15',
-    },
-    {
-      id: 2,
-      title: 'Product Manager',
-      department: 'Product',
-      jobType: 'Full Time',
-      qualification: 'MBA/Bachelor\'s with experience',
-      location: 'New York',
-      salaryMin: '90000',
-      salaryMax: '150000',
-      hideSalary: true,
-      hiringProcess: ['Virtual Interview', 'Case Study'],
-      status: 'Active',
-      applicants: 8,
-      posted: '2024-03-14',
-    },
-  ]);
+  const [jobs, setJobs] = useState([]);
 
   const [applicants] = useState([
     {
@@ -106,6 +81,30 @@ export default function BusinessDashboard() {
     'Walk In'
   ];
 
+  const [selectedJob, setSelectedJob] = useState(null);
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const fetchJobs = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/jobs');
+      if (!response.ok) {
+        throw new Error('Failed to fetch jobs');
+      }
+      const data = await response.json();
+      setJobs(data);
+    } catch (err) {
+      setError(err.message);
+      console.error('Error fetching jobs:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     if (type === 'checkbox') {
@@ -125,43 +124,100 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const newJobPost = {
-      id: jobs.length + 1,
-      ...newJob,
-      status: 'Active',
-      applicants: 0,
-      posted: new Date().toISOString().split('T')[0],
-    };
-    setJobs(prev => [...prev, newJobPost]);
-    setShowModal(false);
-    setNewJob({
-      title: '',
-      jobType: 'Full Time',
-      qualification: '',
-      department: '',
-      location: '',
-      salaryMin: '',
-      salaryMax: '',
-      hideSalary: false,
-      hiringProcess: [],
-      description: '',
-      requirements: '',
-      additionalInfo: '',
-    });
+    try {
+      const response = await fetch('/api/jobs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newJob),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to create job');
+      }
+
+      const createdJob = await response.json();
+      setJobs(prev => [...prev, createdJob]);
+      setShowModal(false);
+      setNewJob({
+        title: '',
+        company: '',
+        // logo: '',
+        jobType: 'Full Time',
+        location: '',
+        salaryMin: '',
+        salaryMax: '',
+        hideSalary: false,
+        description: '',
+        requirements: [],
+        benefits: [],
+        screeningQuestions: [],
+        hiringProcess: [],
+        department: '',
+        qualification: '',
+        additionalInfo: '',
+      });
+    } catch (err) {
+      console.error('Error creating job:', err);
+      alert('Failed to create job. Please try again.');
+    }
   };
 
-  const handleDelete = (id) => {
-    setJobs(prev => prev.filter(job => job.id !== id));
+  const handleDelete = async (_id) => {
+    try {
+      const response = await fetch('/api/jobs', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ _id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete job');
+      }
+
+      setJobs(prev => prev.filter(job => job._id !== _id));
+    } catch (err) {
+      console.error('Error deleting job:', err);
+      alert('Failed to delete job. Please try again.');
+    }
   };
 
-  const handleStatusChange = (id) => {
-    setJobs(prev => prev.map(job => 
-      job.id === id 
-        ? { ...job, status: job.status === 'Active' ? 'Closed' : 'Active' }
-        : job
-    ));
+  const handleStatusChange = async (_id) => {
+    try {
+      const job = jobs.find(j => j._id === _id);
+      if (!job) return;
+
+      const response = await fetch('/api/jobs', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          _id,
+          status: job.status === 'Active' ? 'Closed' : 'Active'
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update job status');
+      }
+
+      const updatedJob = await response.json();
+      setJobs(prev => prev.map(j => j._id === _id ? { ...j, ...updatedJob } : j));
+    } catch (err) {
+      console.error('Error updating job status:', err);
+      alert('Failed to update job status. Please try again.');
+    }
+  };
+
+  const handleViewDetails = (job) => {
+    setSelectedJob(job);
+    setShowDetailsModal(true);
   };
 
   const filteredJobs = jobs
@@ -223,13 +279,35 @@ export default function BusinessDashboard() {
                     type="text"
                     id="title"
                     name="title"
-                    placeholder="Software Engineer/ Marketing executive/ Sales executive etc."
+                    placeholder="e.g., Senior Frontend Developer"
                     value={newJob.title}
                     onChange={handleInputChange}
                     required
                   />
-                  <span className="helper-text">Enter a clear and specific job title</span>
                 </div>
+                <div className="form-group">
+                  <label htmlFor="company" className="required-field">Company Name</label>
+                  <input
+                    type="text"
+                    id="company"
+                    name="company"
+                    placeholder="e.g., Tech Corp"
+                    value={newJob.company}
+                    onChange={handleInputChange}
+                    required
+                  />
+                </div>
+                {/* <div className="form-group">
+                  <label htmlFor="logo">Company Logo URL</label>
+                  <input
+                    type="text"
+                    id="logo"
+                    name="logo"
+                    placeholder="e.g., /company-logo.svg"
+                    value={newJob.logo}
+                    onChange={handleInputChange}
+                  />
+                </div> */}
                 <div className="form-row">
                   <div className="form-group half">
                     <label htmlFor="jobType" className="required-field">Job Type</label>
@@ -373,6 +451,127 @@ export default function BusinessDashboard() {
                   />
                 </div>
                 <div className="form-group">
+                  <label htmlFor="requirements" className="required-field">Requirements</label>
+                  <textarea
+                    id="requirements"
+                    name="requirements"
+                    value={Array.isArray(newJob.requirements) ? newJob.requirements.join('\n') : newJob.requirements}
+                    onChange={(e) => handleInputChange({
+                      target: {
+                        name: 'requirements',
+                        value: e.target.value.split('\n').filter(req => req.trim())
+                      }
+                    })}
+                    rows="4"
+                    placeholder="Enter each requirement on a new line..."
+                    required
+                  />
+                  <span className="helper-text">Enter each requirement on a new line</span>
+                </div>
+                <div className="form-group">
+                  <label htmlFor="benefits" className="required-field">Benefits</label>
+                  <textarea
+                    id="benefits"
+                    name="benefits"
+                    value={Array.isArray(newJob.benefits) ? newJob.benefits.join('\n') : newJob.benefits}
+                    onChange={(e) => handleInputChange({
+                      target: {
+                        name: 'benefits',
+                        value: e.target.value.split('\n').filter(benefit => benefit.trim())
+                      }
+                    })}
+                    rows="4"
+                    placeholder="Enter each benefit on a new line..."
+                    required
+                  />
+                  <span className="helper-text">Enter each benefit on a new line</span>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">❓ Screening Questions</h3>
+                <div className="screening-questions">
+                  {newJob.screeningQuestions.map((question, index) => (
+                    <div key={index} className="question-item">
+                      <div className="form-row">
+                        <div className="form-group">
+                          <input
+                            type="text"
+                            placeholder="Enter question"
+                            value={question.question}
+                            onChange={(e) => {
+                              const updatedQuestions = [...newJob.screeningQuestions];
+                              updatedQuestions[index].question = e.target.value;
+                              handleInputChange({
+                                target: {
+                                  name: 'screeningQuestions',
+                                  value: updatedQuestions
+                                }
+                              });
+                            }}
+                          />
+                        </div>
+                        <div className="form-group">
+                          <select
+                            value={question.type}
+                            onChange={(e) => {
+                              const updatedQuestions = [...newJob.screeningQuestions];
+                              updatedQuestions[index].type = e.target.value;
+                              handleInputChange({
+                                target: {
+                                  name: 'screeningQuestions',
+                                  value: updatedQuestions
+                                }
+                              });
+                            }}
+                          >
+                            <option value="text">Text</option>
+                            <option value="boolean">Yes/No</option>
+                          </select>
+                        </div>
+                        <button
+                          type="button"
+                          className="remove-question"
+                          onClick={() => {
+                            const updatedQuestions = newJob.screeningQuestions.filter((_, i) => i !== index);
+                            handleInputChange({
+                              target: {
+                                name: 'screeningQuestions',
+                                value: updatedQuestions
+                              }
+                            });
+                          }}
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    className="add-question"
+                    onClick={() => {
+                      const newQuestion = {
+                        id: newJob.screeningQuestions.length + 1,
+                        question: '',
+                        type: 'text'
+                      };
+                      handleInputChange({
+                        target: {
+                          name: 'screeningQuestions',
+                          value: [...newJob.screeningQuestions, newQuestion]
+                        }
+                      });
+                    }}
+                  >
+                    + Add Question
+                  </button>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">📝 Additional Information</h3>
+                <div className="form-group">
                   <label htmlFor="additionalInfo">Additional Information</label>
                   <textarea
                     id="additionalInfo"
@@ -390,6 +589,128 @@ export default function BusinessDashboard() {
                 <button type="submit" className="primary-btn">Post Job</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {showDetailsModal && selectedJob && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-header">
+              <h2>Job Details</h2>
+              <button className="close-btn" onClick={() => setShowDetailsModal(false)}>×</button>
+            </div>
+            <div className="job-details">
+              <div className="form-section">
+                <h3 className="form-section-title">📋 Basic Information</h3>
+                <div className="details-grid">
+                  <div className="detail-item">
+                    <label>Job ID</label>
+                    <p>#{selectedJob.jobId}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Job Title</label>
+                    <p>{selectedJob.title}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Company</label>
+                    <p>{selectedJob.company}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Department</label>
+                    <p>{selectedJob.department}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Job Type</label>
+                    <p>{selectedJob.jobType}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Location</label>
+                    <p>{selectedJob.location}</p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Status</label>
+                    <p><span className={`status ${selectedJob.status.toLowerCase()}`}>
+                      {selectedJob.status}
+                    </span></p>
+                  </div>
+                  <div className="detail-item">
+                    <label>Posted Date</label>
+                    <p>{new Date(selectedJob.postedDate).toLocaleDateString()}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">💰 Compensation</h3>
+                <div className="details-grid">
+                  <div className="detail-item">
+                    <label>Salary Range</label>
+                    <p>{selectedJob.hideSalary ? 'Hidden' : `$${selectedJob.salaryMin} - $${selectedJob.salaryMax}`}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">📝 Job Description</h3>
+                <div className="detail-item">
+                  <p>{selectedJob.description}</p>
+                </div>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">✅ Requirements</h3>
+                <ul className="detail-list">
+                  {selectedJob.requirements.map((req, index) => (
+                    <li key={index}>{req}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">🎁 Benefits</h3>
+                <ul className="detail-list">
+                  {selectedJob.benefits.map((benefit, index) => (
+                    <li key={index}>{benefit}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="form-section">
+                <h3 className="form-section-title">🤝 Hiring Process</h3>
+                <div className="hiring-steps">
+                  {selectedJob.hiringProcess.map((step, index) => (
+                    <div key={index} className="hiring-step">
+                      <span className="step-number">{index + 1}</span>
+                      <span>{step}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {selectedJob.screeningQuestions.length > 0 && (
+                <div className="form-section">
+                  <h3 className="form-section-title">❓ Screening Questions</h3>
+                  <div className="screening-questions-list">
+                    {selectedJob.screeningQuestions.map((q, index) => (
+                      <div key={index} className="question-item">
+                        <p className="question-text">{q.question}</p>
+                        <span className="question-type">{q.type === 'boolean' ? 'Yes/No' : 'Text'}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {selectedJob.additionalInfo && (
+                <div className="form-section">
+                  <h3 className="form-section-title">ℹ️ Additional Information</h3>
+                  <div className="detail-item">
+                    <p>{selectedJob.additionalInfo}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -470,6 +791,7 @@ export default function BusinessDashboard() {
             <table>
               <thead>
                 <tr>
+                  <th>Job ID</th>
                   <th>Job Title</th>
                   <th>Department</th>
                   <th>Location</th>
@@ -481,7 +803,8 @@ export default function BusinessDashboard() {
               </thead>
               <tbody>
                 {filteredJobs.map((job) => (
-                  <tr key={job.id}>
+                  <tr key={job._id}>
+                    <td>#{job.jobId}</td>
                     <td>{job.title}</td>
                     <td>{job.department}</td>
                     <td>{job.location}</td>
@@ -491,21 +814,27 @@ export default function BusinessDashboard() {
                       </span>
                     </td>
                     <td>{job.applicants}</td>
-                    <td>{job.posted}</td>
+                    <td>{new Date(job.postedDate).toLocaleDateString()}</td>
                     <td>
                       <div className="action-buttons">
-                        <button className="icon-btn" title="View Details">👁️</button>
+                        <button 
+                          className="icon-btn" 
+                          title="View Details"
+                          onClick={() => handleViewDetails(job)}
+                        >
+                          👁️
+                        </button>
                         <button 
                           className="icon-btn" 
                           title={job.status === 'Active' ? 'Close Job' : 'Reopen Job'}
-                          onClick={() => handleStatusChange(job.id)}
+                          onClick={() => handleStatusChange(job._id)}
                         >
                           {job.status === 'Active' ? '🔒' : '🔓'}
                         </button>
                         <button 
                           className="icon-btn" 
                           title="Delete Job"
-                          onClick={() => handleDelete(job.id)}
+                          onClick={() => handleDelete(job._id)}
                         >
                           🗑️
                         </button>
