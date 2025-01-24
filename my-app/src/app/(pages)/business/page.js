@@ -32,6 +32,9 @@ export default function BusinessDashboard() {
   });
 
   const [jobs, setJobs] = useState([]);
+  const [applications, setApplications] = useState([]);
+  const [selectedApplication, setSelectedApplication] = useState(null);
+  const [showApplicationModal, setShowApplicationModal] = useState(false);
 
   const [applicants] = useState([
     {
@@ -83,9 +86,11 @@ export default function BusinessDashboard() {
 
   const [selectedJob, setSelectedJob] = useState(null);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [resumeLoading, setResumeLoading] = useState(true);
 
   useEffect(() => {
     fetchJobs();
+    fetchApplications();
   }, []);
 
   const fetchJobs = async () => {
@@ -102,6 +107,19 @@ export default function BusinessDashboard() {
       console.error('Error fetching jobs:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchApplications = async () => {
+    try {
+      const response = await fetch('/api/applications');
+      if (!response.ok) {
+        throw new Error('Failed to fetch applications');
+      }
+      const data = await response.json();
+      setApplications(data);
+    } catch (err) {
+      console.error('Error fetching applications:', err);
     }
   };
 
@@ -220,13 +238,31 @@ export default function BusinessDashboard() {
     setShowDetailsModal(true);
   };
 
+  const handleViewApplication = (application) => {
+    setSelectedApplication(application);
+    setShowApplicationModal(true);
+  };
+
   const filteredJobs = jobs
     .filter(job => {
-      const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          job.location.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = statusFilter === 'all' || job.status.toLowerCase() === statusFilter.toLowerCase();
-      const matchesDepartment = departmentFilter === 'all' || job.department.toLowerCase() === departmentFilter.toLowerCase();
+      // Check if job has all required fields
+      if (!job || !job.title || !job.department || !job.location || !job.status) {
+        return false;
+      }
+
+      const matchesSearch = 
+        job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.department.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        job.location.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus = 
+        statusFilter === 'all' || 
+        job.status.toLowerCase() === statusFilter.toLowerCase();
+
+      const matchesDepartment = 
+        departmentFilter === 'all' || 
+        job.department.toLowerCase() === departmentFilter.toLowerCase();
+
       return matchesSearch && matchesStatus && matchesDepartment;
     });
 
@@ -254,6 +290,39 @@ export default function BusinessDashboard() {
       { name: 'Indeed', count: 28 },
       { name: 'Referrals', count: 15 },
     ],
+  };
+
+  const handleUpdateStatus = async (_id, status) => {
+    try {
+      const response = await fetch('/api/applications', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ _id, status })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update application status');
+      }
+
+      // Update the applications list
+      setApplications(prev => 
+        prev.map(app => 
+          app._id === _id ? { ...app, status } : app
+        )
+      );
+
+      // Update the selected application if it's open in modal
+      if (selectedApplication && selectedApplication._id === _id) {
+        setSelectedApplication(prev => ({ ...prev, status }));
+      }
+
+      alert(`Application status updated to ${status}`);
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      alert('Failed to update application status');
+    }
   };
 
   return (
@@ -849,42 +918,48 @@ export default function BusinessDashboard() {
 
         {activeTab === 'applicants' && (
           <div className="applicants-grid">
-            {applicants.map((applicant) => (
-              <div key={applicant.id} className="applicant-card">
+            {applications.map((application) => (
+              <div key={application._id} className="applicant-card">
                 <div className="applicant-header">
                   <div className="applicant-avatar">
-                    {applicant.name.charAt(0)}
+                    {application.fullName.charAt(0)}
                   </div>
                   <div className="applicant-info">
-                    <h4>{applicant.name}</h4>
-                    <p>{applicant.jobTitle}</p>
+                    <h4>{application.fullName}</h4>
+                    <p>Job ID: #{application.jobId}</p>
                   </div>
                 </div>
                 <div className="applicant-details">
                   <div className="detail-row">
-                    <span className="detail-label">Experience</span>
-                    <span className="detail-value">{applicant.experience}</span>
+                    <span className="detail-label">User ID</span>
+                    <span className="detail-value">#{application.userId}</span>
                   </div>
                   <div className="detail-row">
-                    <span className="detail-label">Education</span>
-                    <span className="detail-value">{applicant.education}</span>
+                    <span className="detail-label">Email</span>
+                    <span className="detail-value">{application.email}</span>
+                  </div>
+                  <div className="detail-row">
+                    <span className="detail-label">Phone</span>
+                    <span className="detail-value">{application.phone}</span>
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Applied Date</span>
-                    <span className="detail-value">{applicant.appliedDate}</span>
+                    <span className="detail-value">
+                      {new Date(application.appliedDate).toLocaleDateString()}
+                    </span>
                   </div>
                   <div className="detail-row">
                     <span className="detail-label">Status</span>
-                    <span className="detail-value">{applicant.status}</span>
-                  </div>
-                  <div className="detail-row">
-                    <span className="detail-label">Match Score</span>
-                    <span className="detail-value">{applicant.matchScore}%</span>
+                    <span className="detail-value">{application.status}</span>
                   </div>
                 </div>
                 <div className="applicant-actions">
-                  <button className="action-btn approve">Approve</button>
-                  <button className="action-btn reject">Reject</button>
+                  <button 
+                    className="action-btn view"
+                    onClick={() => handleViewApplication(application)}
+                  >
+                    View Details
+                  </button>
                 </div>
               </div>
             ))}
@@ -964,6 +1039,116 @@ export default function BusinessDashboard() {
           </div>
         )}
       </div>
+
+      {showApplicationModal && selectedApplication && (
+        <div className="modal-overlay">
+          <div className="modal application-modal">
+            <div className="modal-header">
+              <h2>Application Details</h2>
+              <button 
+                className="close-btn" 
+                onClick={() => setShowApplicationModal(false)}
+              >
+                ×
+              </button>
+            </div>
+            <div className="modal-content">
+              <div className="application-details">
+                <div className="form-section">
+                  <h3 className="form-section-title">👤 Applicant Information</h3>
+                  <div className="details-grid">
+                    <div className="detail-item">
+                      <label>User ID</label>
+                      <p>#{selectedApplication.userId}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Full Name</label>
+                      <p>{selectedApplication.fullName}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Email</label>
+                      <p>{selectedApplication.email}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Phone</label>
+                      <p>{selectedApplication.phone}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Applied For</label>
+                      <p>Job #{selectedApplication.jobId}</p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Status</label>
+                      <p>
+                        <span className={`status ${selectedApplication.status.toLowerCase()}`}>
+                          {selectedApplication.status}
+                        </span>
+                      </p>
+                    </div>
+                    <div className="detail-item">
+                      <label>Applied Date</label>
+                      <p>{new Date(selectedApplication.appliedDate).toLocaleDateString()}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedApplication.coverLetter && (
+                  <div className="form-section">
+                    <h3 className="form-section-title">📝 Cover Letter</h3>
+                    <div className="detail-item">
+                      <p>{selectedApplication.coverLetter}</p>
+                    </div>
+                  </div>
+                )}
+
+                <div className="form-section">
+                  <h3 className="form-section-title">✨ Actions</h3>
+                  <div className="action-buttons">
+                    <button 
+                      className="action-btn approve"
+                      onClick={() => handleUpdateStatus(selectedApplication._id, 'Approved')}
+                    >
+                      Approve
+                    </button>
+                    <button 
+                      className="action-btn reject"
+                      onClick={() => handleUpdateStatus(selectedApplication._id, 'Rejected')}
+                    >
+                      Reject
+                    </button>
+                    <button 
+                      className="action-btn schedule"
+                      onClick={() => handleUpdateStatus(selectedApplication._id, 'Interview Scheduled')}
+                    >
+                      Schedule Interview
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {selectedApplication.resumeId && (
+                <div className="resume-viewer">
+                  <div className="resume-header">
+                    <h3>📄 Resume</h3>
+                  </div>
+                  {resumeLoading && (
+                    <div className="resume-loading">
+                      <div className="loading-spinner"></div>
+                      <p>Loading resume...</p>
+                    </div>
+                  )}
+                  <iframe
+                    src={`/api/applications/${selectedApplication._id}/resume`}
+                    title="Resume Viewer"
+                    className="resume-frame"
+                    onLoad={() => setResumeLoading(false)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

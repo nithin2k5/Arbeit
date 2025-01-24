@@ -39,6 +39,11 @@ export default function Dashboard() {
   };
 
   const filteredJobs = jobs.filter(job => {
+    // Check if job has all required fields
+    if (!job || !job.title || !job.company || !job.location || !job.department || !job.jobType) {
+      return false;
+    }
+
     const matchesSearch = 
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||

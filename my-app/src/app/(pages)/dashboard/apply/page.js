@@ -1,26 +1,24 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import './apply.css';
-import './page.css';
 
-export default function ApplyPage() {
+function ApplyForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const jobId = searchParams.get('jobId');
   const [job, setJob] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const jobId = searchParams.get('jobId');
     if (jobId) {
-      fetchJobDetails(jobId);
+      fetchJobDetails();
     }
-  }, [searchParams]);
+  }, [jobId]);
 
-  const fetchJobDetails = async (jobId) => {
+  const fetchJobDetails = async () => {
     try {
-      setLoading(true);
       const response = await fetch('/api/jobs', {
         method: 'POST',
         headers: {
@@ -29,17 +27,40 @@ export default function ApplyPage() {
         body: JSON.stringify({ jobId: jobId.toString() })
       });
       const data = await response.json();
-      
       if (!response.ok) {
         throw new Error(data.error || 'Failed to fetch job details');
       }
-      
       setJob(data);
     } catch (err) {
       setError(err.message);
-      console.error('Error fetching job details:', err);
+      console.error('Error fetching job:', err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    formData.append('jobId', jobId);
+
+    try {
+      const response = await fetch('/api/applications', {
+        method: 'POST',
+        body: formData // Send as FormData instead of JSON
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to submit application');
+      }
+
+      // Show success message with user ID
+      alert(`Application submitted successfully! Your User ID is: ${data.userId}`);
+      router.push('/dashboard?success=true');
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      alert('Failed to submit application. Please try again.');
     }
   };
 
@@ -125,39 +146,45 @@ export default function ApplyPage() {
         <div className="apply-form-section">
           <div className="apply-card">
             <h2>Apply for this position</h2>
-            <form className="apply-form">
+            <form className="apply-form" onSubmit={handleSubmit}>
               <div className="form-group">
                 <label htmlFor="fullName">Full Name</label>
-                <input type="text" id="fullName" required />
+                <input type="text" id="fullName" name="fullName" required />
               </div>
               
               <div className="form-group">
                 <label htmlFor="email">Email</label>
-                <input type="email" id="email" required />
+                <input type="email" id="email" name="email" required />
               </div>
               
               <div className="form-group">
                 <label htmlFor="phone">Phone</label>
-                <input type="tel" id="phone" required />
+                <input type="tel" id="phone" name="phone" required />
               </div>
               
               <div className="form-group">
                 <label htmlFor="resume">Resume</label>
-                <input type="file" id="resume" accept=".pdf,.doc,.docx" required />
+                <input type="file" id="resume" name="resume" accept=".pdf,.doc,.docx" required />
               </div>
               
               <div className="form-group">
                 <label htmlFor="coverLetter">Cover Letter (Optional)</label>
-                <textarea id="coverLetter" rows="4"></textarea>
+                <textarea id="coverLetter" name="coverLetter" rows="4"></textarea>
               </div>
               
-              <button type="submit" className="submit-button">
-                Submit Application
-              </button>
+              <button type="submit" className="submit-button">Submit Application</button>
             </form>
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function ApplyPage() {
+  return (
+    <Suspense fallback={<div className="loading">Loading...</div>}>
+      <ApplyForm />
+    </Suspense>
   );
 } 

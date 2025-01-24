@@ -218,6 +218,15 @@
   color: #ef4444;
 }
 
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  font-size: 1.125rem;
+  color: var(--text-light);
+}
+
 @media (max-width: 1024px) {
   .apply-content {
     grid-template-columns: 1fr;
