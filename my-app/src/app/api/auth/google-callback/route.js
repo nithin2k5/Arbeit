@@ -83,7 +83,7 @@ export async function GET(request) {
         path: '/',
       };
 
-      const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/demo`);
+      const response = NextResponse.redirect(`${process.env.NEXT_PUBLIC_APP_URL}/`);
       
       response.cookies.set('accessToken', accessToken, {
         ...cookieOptions,

@@ -1,16 +1,30 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './page.css';
 import { useAuth } from "../../../context/AuthContext"
 import { useRouter } from 'next/navigation';
 import { Toaster, toast } from 'react-hot-toast';
+import Image from 'next/image';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
+  const [verificationStep, setVerificationStep] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [countdown, setCountdown] = useState(0);
   const router = useRouter();
   const { login, register, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [countdown]);
 
   const handleGoogleSignIn = async () => {
     setError('');
@@ -25,26 +39,94 @@ export default function AuthPage() {
     }
   };
 
+  const sendVerificationCode = async (email) => {
+    try {
+      if (countdown > 0) {
+        toast.error(`Please wait ${countdown} seconds before requesting a new code`);
+        return false;
+      }
+
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Failed to send verification code');
+      }
+
+      toast.success('Verification code sent to your email');
+      setCountdown(30);
+      return true;
+    } catch (err) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
+  const verifyCode = async (email, code) => {
+    try {
+      const response = await fetch('/api/auth/verify-email', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code }),
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Invalid verification code');
+      }
+
+      return true;
+    } catch (err) {
+      toast.error(err.message);
+      return false;
+    }
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
     
     try {
-      const email = e.target.email.value;
-      const password = e.target.password.value;
+      const formData = new FormData(e.target);
       
-      const response = await login(email, password);
-
-      if (!response.ok) {
-        const data = await response.json();
-        toast.error(data.error || 'Login failed');
-        throw new Error(data.error || 'Login failed');
+      if (!verificationStep) {
+        const formEmail = formData.get('email');
+        const formPassword = formData.get('password');
+        
+        if (!formEmail || !formPassword) {
+          throw new Error('Please fill in all fields');
+        }
+        
+        setEmail(formEmail);
+        setPassword(formPassword);
+        const sent = await sendVerificationCode(formEmail);
+        if (sent) {
+          setVerificationStep(true);
+        }
+      } else {
+        const code = formData.get('verificationCode');
+        if (!code) {
+          throw new Error('Please enter verification code');
+        }
+        
+        const verified = await verifyCode(email, code);
+        
+        if (verified) {
+          const response = await login(email, password);
+          if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.error || 'Login failed');
+          }
+          
+          toast.success('Login successful!');
+          router.replace('/');
+        }
       }
-
-      const data = await response.json();
-      toast.success('Login successful!');
-      router.replace('/');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {
@@ -162,54 +244,70 @@ export default function AuthPage() {
             </div>
 
             <form className="auth-form" onSubmit={isLogin ? handleLogin : handleSignup}>
-              {/* {!isLogin && (
+              {isLogin && verificationStep ? (
                 <div className="form-group">
-                  <label htmlFor="name">Full Name</label>
+                  <label htmlFor="verificationCode">Verification Code</label>
                   <input
                     type="text"
-                    id="name"
-                    placeholder="Enter your name"
+                    id="verificationCode"
+                    name="verificationCode"
+                    placeholder="Enter 6-digit code"
                     required
+                    pattern="[0-9]{6}"
+                    maxLength={6}
                   />
+                  <button 
+                    type="button" 
+                    className="resend-code-btn"
+                    onClick={() => sendVerificationCode(email)}
+                    disabled={loading || countdown > 0}
+                  >
+                    {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
+                  </button>
                 </div>
-              )} */}
+              ) : (
+                <>
+                  <div className="form-group">
+                    <label htmlFor="email">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="email">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  placeholder="Enter your email"
-                  required
-                />
-              </div>
+                  <div className="form-group">
+                    <label htmlFor="password">Password</label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      placeholder="Enter your password"
+                      required
+                      minLength={6}
+                    />
+                  </div>
 
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="Enter your password"
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              {!isLogin && (
-                <div className="form-group">
-                  <label htmlFor="confirmPassword">Confirm Password</label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    placeholder="Confirm your password"
-                    required
-                    minLength={6}
-                  />
-                </div>
+                  {!isLogin && (
+                    <div className="form-group">
+                      <label htmlFor="confirmPassword">Confirm Password</label>
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="Confirm your password"
+                        required
+                        minLength={6}
+                      />
+                    </div>
+                  )}
+                </>
               )}
 
               <button type="submit" className="auth-submit" disabled={loading}>
-                {loading ? 'Loading...' : (isLogin ? 'Login' : 'Create Account')}
+                {loading ? 'Loading...' : (isLogin ? (verificationStep ? 'Verify Code' : 'Login') : 'Create Account')}
               </button>
             </form>
 
