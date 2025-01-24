@@ -12,11 +12,6 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [jobTypeFilter, setJobTypeFilter] = useState('all');
-  const [selectedJob, setSelectedJob] = useState(null);
-  const [activeFilter, setActiveFilter] = useState('latest');
-  const [showMentorshipModal, setShowMentorshipModal] = useState(false);
-
-  const keywords = ['All', 'Remote', 'Full-Time', 'Part-Time', 'Contract', 'Engineering', 'Design', 'Marketing'];
 
   useEffect(() => {
     fetchJobs();
@@ -39,16 +34,33 @@ export default function Dashboard() {
     }
   };
 
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value === '') {
+      setDepartmentFilter('all');
+      setJobTypeFilter('all');
+    }
+  };
+
   const filteredJobs = jobs.filter(job => {
-    // Check if job has all required fields
     if (!job || !job.title || !job.company || !job.location || !job.department || !job.jobType) {
       return false;
     }
 
-    const matchesSearch = 
-      job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchTerm.toLowerCase());
+    const searchFields = [
+      job.title,
+      job.company,
+      job.location,
+      job.department,
+      job.jobType,
+      ...(job.requirements || []),
+      job.description || ''
+    ].map(field => field.toLowerCase());
+
+    const searchTerms = searchTerm.toLowerCase().split(' ');
+    const matchesSearch = searchTerms.every(term => 
+      searchFields.some(field => field.includes(term))
+    );
     
     const matchesDepartment = 
       departmentFilter === 'all' || 
@@ -61,26 +73,9 @@ export default function Dashboard() {
     return matchesSearch && matchesDepartment && matchesJobType && job.status === 'Active';
   });
 
-  const handleJobClick = (e, job) => {
-    e.preventDefault(); // Prevent the Link from navigating immediately
-    setSelectedJob(job);
-  };
-
-  const handleApplyClick = (job) => {
-    router.push(`/dashboard/apply?jobId=${job.jobId}`);
-  };
-
-  if (loading) {
-    return <div className="loading">Loading jobs...</div>;
-  }
-
-  if (error) {
-    return <div className="error">Error: {error}</div>;
-  }
-
   return (
     <div className="dashboard-container">
-      {/* Header One */}
+      {/* Header */}
       <header className="main-header">
         <div className="logo">
           <h1>Arbeit</h1>
@@ -89,47 +84,38 @@ export default function Dashboard() {
         <div className="search-bar">
           <input
             type="text"
-            placeholder="Search for jobs, companies, or keywords..."
+            placeholder="Search jobs by title, company, skills, or location..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={handleSearch}
           />
-          <button className="search-button">Search</button>
+          <button className="search-button">
+            <i className="fas fa-search"></i>
+          </button>
         </div>
 
-        <div className="header-buttons">
-          <button className="action-button">Resume Generator</button>
-          <button className="action-button">ATS Scanner</button>
-          <div className="profile-button">
-            <i className="fas fa-user"></i>
-            <div className="profile-dropdown">
-              <button onClick={() => router.push('/settings')} className="dropdown-item">
-                Settings
-              </button>
-              <button onClick={() => router.push('/auth')} className="dropdown-item">
-                Log out
-              </button>
+        <div className="header-nav">
+          <Link href="/dashboard/mentorship" className="nav-link">Mentorship</Link>
+          <Link href="/dashboard/resume" className="nav-link">Resume Builder</Link>
+          <Link href="/dashboard/ats-scanner" className="nav-link">ATS Scanner</Link>
+          <div className="profile-dropdown">
+            <button className="profile-button">
+              <i className="fas fa-user"></i>
+            </button>
+            <div className="dropdown-content">
+              <Link href="/settings" className="dropdown-item">Settings</Link>
+              <Link href="/auth" className="dropdown-item">Log out</Link>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Header Two - Filters */}
+      {/* Filters */}
       <div className="filters-header">
-        <div className="filter-group">
-          <button className={`filter-btn ${activeFilter === 'latest' ? 'active' : ''}`}
-                  onClick={() => setActiveFilter('latest')}>
-            Latest
-          </button>
-          <button className={`filter-btn ${activeFilter === 'old' ? 'active' : ''}`}
-                  onClick={() => setActiveFilter('old')}>
-            Oldest
-          </button>
-        </div>
-
         <div className="filter-dropdowns">
           <select
             value={departmentFilter}
             onChange={(e) => setDepartmentFilter(e.target.value)}
+            className="filter-select"
           >
             <option value="all">All Departments</option>
             <option value="Engineering">Engineering</option>
@@ -141,6 +127,7 @@ export default function Dashboard() {
           <select
             value={jobTypeFilter}
             onChange={(e) => setJobTypeFilter(e.target.value)}
+            className="filter-select"
           >
             <option value="all">All Job Types</option>
             <option value="Full Time">Full Time</option>
@@ -151,184 +138,84 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* AI Mentorship Section */}
-      <div className="mentorship-section">
-        <div className="mentorship-content">
-          <div className="mentorship-text">
-            <h2>AI-Powered Career Mentorship</h2>
-            <p>Get personalized career guidance, resume reviews, and interview preparation from our AI mentor.</p>
-            <div className="mentorship-features">
-              <div className="feature">
-                <span className="feature-icon">🎯</span>
-                <span>Personalized career roadmap</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">📝</span>
-                <span>Resume optimization</span>
-              </div>
-              <div className="feature">
-                <span className="feature-icon">🤝</span>
-                <span>Interview preparation</span>
-              </div>
-            </div>
-            <button 
-              className="start-mentorship-btn"
-              onClick={() => router.push('/dashboard/mentorship')}
-            >
-              Start Your Journey
-            </button>
-          </div>
-          <div className="mentorship-illustration">
-            <div className="ai-mentor-avatar">
-              {/* Placeholder for AI mentor illustration */}
-              <div className="avatar-circle">
-                <span>AI</span>
-              </div>
-              <div className="pulse-effect"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="dashboard-main">
-        <div className="jobs-grid">
-          {filteredJobs.length === 0 ? (
-            <div className="no-jobs">
-              <h3>No jobs found</h3>
-              <p>Try adjusting your search or filters</p>
-            </div>
-          ) : (
-            filteredJobs.map((job) => (
-              <Link 
-                href={`/dashboard/apply?jobId=${job.jobId}`}
-                key={job.jobId} 
-                className={`job-card ${selectedJob?.jobId === job.jobId ? 'selected' : ''}`}
-                onClick={(e) => handleJobClick(e, job)}
-              >
-                <div className="job-card-header">
-                  <div className="company-logo">
-                    {job.logo ? (
-                      <img src={job.logo} alt={`${job.company} logo`} />
-                    ) : (
-                      <span>{job.company[0]}</span>
-                    )}
-                  </div>
-                  <div className="job-info">
-                    <h3>{job.title}</h3>
-                    <p className="company">{job.company}</p>
-                  </div>
-                  <div className="job-id">#{job.jobId}</div>
-                </div>
-                <div className="job-details">
-                  <div className="detail">
-                    <span className="icon">📍</span>
-                    <span>{job.location}</span>
-                  </div>
-                  <div className="detail">
-                    <span className="icon">💼</span>
-                    <span>{job.jobType}</span>
-                  </div>
-                  <div className="detail">
-                    <span className="icon">🏢</span>
-                    <span>{job.department}</span>
-                  </div>
-                  {!job.hideSalary && (
-                    <div className="detail">
-                      <span className="icon">💰</span>
-                      <span>${job.salaryMin} - ${job.salaryMax}</span>
-                    </div>
-                  )}
-                </div>
-                <div className="job-footer">
-                  <div className="tags">
-                    {job.requirements.slice(0, 3).map((req, index) => (
-                      <span key={index} className="tag">{req}</span>
-                    ))}
-                  </div>
-                  <span className="posted-date">
-                    Posted {new Date(job.postedDate).toLocaleDateString()}
-                  </span>
-                </div>
-              </Link>
-            ))
-          )}
-        </div>
-
-        {/* Side Details Panel */}
-        <div className="job-details-panel">
-          {selectedJob ? (
-            <div className="details-content">
-              <div className="details-header">
-                <div className="company-logo">
-                  {selectedJob.logo ? (
-                    <img src={selectedJob.logo} alt={`${selectedJob.company} logo`} />
-                  ) : (
-                    <span>{selectedJob.company[0]}</span>
-                  )}
-                </div>
-                <div>
-                  <h2>{selectedJob.title}</h2>
-                  <p className="company">{selectedJob.company}</p>
-                  <div className="job-id">#{selectedJob.jobId}</div>
-                </div>
+        {loading ? (
+          <div className="loading">
+            <div className="loading-spinner"></div>
+            <p>Loading jobs...</p>
+          </div>
+        ) : error ? (
+          <div className="error">
+            <p>Error: {error}</p>
+            <button onClick={fetchJobs} className="retry-btn">Retry</button>
+          </div>
+        ) : (
+          <div className="jobs-grid">
+            {filteredJobs.length === 0 ? (
+              <div className="no-jobs">
+                <h3>No jobs found</h3>
+                <p>Try adjusting your search terms or filters</p>
               </div>
-              
-              <div className="details-info">
-                <div className="detail-section">
-                  <h3>Job Details</h3>
-                  <div className="detail-grid">
+            ) : (
+              filteredJobs.map((job) => (
+                <Link 
+                  href={`/dashboard/apply?jobId=${job.jobId}`}
+                  key={job.jobId} 
+                  className="job-card"
+                >
+                  <div className="job-card-header">
+                    <div className="company-logo">
+                      {job.logo ? (
+                        <img src={job.logo} alt={`${job.company} logo`} />
+                      ) : (
+                        <span>{job.company[0]}</span>
+                      )}
+                    </div>
+                    <div className="job-info">
+                      <h3>{job.title}</h3>
+                      <p className="company">{job.company}</p>
+                    </div>
+                    <div className="job-id">#{job.jobId}</div>
+                  </div>
+                  <div className="job-details">
                     <div className="detail">
                       <span className="icon">📍</span>
-                      <span>{selectedJob.location}</span>
+                      <span>{job.location}</span>
                     </div>
                     <div className="detail">
                       <span className="icon">💼</span>
-                      <span>{selectedJob.jobType}</span>
+                      <span>{job.jobType}</span>
                     </div>
                     <div className="detail">
                       <span className="icon">🏢</span>
-                      <span>{selectedJob.department}</span>
+                      <span>{job.department}</span>
                     </div>
-                    {!selectedJob.hideSalary && (
+                    {!job.hideSalary && (
                       <div className="detail">
                         <span className="icon">💰</span>
-                        <span>${selectedJob.salaryMin} - ${selectedJob.salaryMax}</span>
+                        <span>
+                          ${typeof job.salaryMin === 'number' ? job.salaryMin.toLocaleString() : '0'} - 
+                          ${typeof job.salaryMax === 'number' ? job.salaryMax.toLocaleString() : '0'}
+                        </span>
                       </div>
                     )}
                   </div>
-                </div>
-
-                <div className="detail-section">
-                  <h3>Description</h3>
-                  <p>{selectedJob.description}</p>
-                </div>
-
-                <div className="detail-section">
-                  <h3>Requirements</h3>
-                  <ul>
-                    {selectedJob.requirements.map((req, index) => (
-                      <li key={index}>{req}</li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="details-buttons">
-                  <button 
-                    className="apply-button"
-                    onClick={() => handleApplyClick(selectedJob)}
-                  >
-                    Apply Now
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="no-selection">
-              <p>Select a job to view details</p>
-            </div>
-          )}
-        </div>
+                  <div className="job-footer">
+                    <div className="tags">
+                      {(job.requirements || []).slice(0, 3).map((req, index) => (
+                        <span key={index} className="tag">{String(req)}</span>
+                      ))}
+                    </div>
+                    <span className="posted-date">
+                      Posted {job.postedDate ? new Date(job.postedDate).toLocaleDateString() : 'Recently'}
+                    </span>
+                  </div>
+                </Link>
+              ))
+            )}
+          </div>
+        )}
       </main>
     </div>
   );
