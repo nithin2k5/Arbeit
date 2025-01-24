@@ -20,7 +20,7 @@ export async function GET() {
 
             return Response.json({
                 user: {
-                    username: decoded.username
+                    email: decoded.email
                 }
             }, { status: 200 });
 

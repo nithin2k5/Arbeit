@@ -9,8 +9,21 @@ export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [error, setError] = useState('');
   const router = useRouter();
-  const { login, register } = useAuth();
+  const { login, register, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+
+  const handleGoogleSignIn = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+      router.replace('/demo');
+    } catch (err) {
+      setError('Failed to sign in with Google');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -116,6 +129,25 @@ export default function AuthPage() {
                 {error}
               </div>
             )}
+
+            <button 
+              className="google-auth-btn" 
+              onClick={handleGoogleSignIn}
+              disabled={loading}
+            >
+              <Image 
+                src="/google.svg" 
+                alt="Google" 
+                width={20} 
+                height={20}
+                priority
+              />
+              Continue with Google
+            </button>
+
+            <div className="auth-divider">
+              <span>or</span>
+            </div>
 
             <div className="auth-tabs">
               <button 

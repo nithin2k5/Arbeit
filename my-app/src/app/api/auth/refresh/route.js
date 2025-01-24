@@ -22,7 +22,7 @@ export async function GET(request) {
 
             // Generate new access token with role
             const newAccessToken = generateAccessToken({ 
-                username: decoded.username,
+                email: decoded.email,
                 role: decoded.role || 'user'  // Maintain role information
             });
             
@@ -37,7 +37,7 @@ export async function GET(request) {
             return Response.json({
                 message: 'Access Token Refreshed',
                 user: {
-                    username: decoded.username,
+                    email: decoded.email,
                     role: decoded.role || 'user'  // Include role in response
                 }
             }, { status: 200 });

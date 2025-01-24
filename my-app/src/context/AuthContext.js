@@ -56,12 +56,12 @@ export function AuthProvider({children}) {
         };
     }, [user, router]);
 
-    const login = async(username, password) => {
+    const login = async(email, password) => {
         try {
             const response = await fetch('/api/auth/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ Username: username, Password: password }),
+                body: JSON.stringify({ email: email, Password: password }),
             });
 
             if (!response.ok) {
@@ -98,12 +98,12 @@ export function AuthProvider({children}) {
         }
     }   
 
-    const register = async(username, password) => {
+    const register = async(email, password) => {
         try {
             const response = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ Username: username, Password: password }),
+                body: JSON.stringify({ email: email, Password: password }),
             });
 
             if (!response.ok) {
@@ -143,8 +143,32 @@ export function AuthProvider({children}) {
         }
     };
 
+    const signInWithGoogle = async () => {
+        try {
+            const response = await fetch('/api/auth/google-signin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Google sign-in failed:', errorData);
+                throw new Error(errorData.error || 'Failed to sign in with Google');
+            }
+
+            const data = await response.json();
+            // Redirect to Google OAuth consent screen
+            window.location.href = data.url;
+        } catch (error) {
+            console.error('Failed to initialize Google sign in:', error);
+            throw error;
+        }
+    };
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, setUser, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, setUser, logout, signInWithGoogle }}>
             {children}
         </AuthContext.Provider> 
     );

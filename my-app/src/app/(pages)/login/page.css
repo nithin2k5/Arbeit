@@ -1052,3 +1052,51 @@ body {
   font-size: 0.875rem;
   border: 1px solid rgba(220, 38, 38, 0.2);
 }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1.5rem 0;
+  color: var(--grey-400);
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid var(--grey-200);
+}
+
+.auth-divider span {
+  padding: 0 1rem;
+  font-size: 0.875rem;
+}
+
+.google-auth-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  border: 1px solid var(--grey-200);
+  border-radius: 0.5rem;
+  background: white;
+  color: var(--text-color);
+  font-weight: 500;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.google-auth-btn:hover {
+  background: var(--grey-50);
+  border-color: var(--grey-300);
+  transform: translateY(-1px);
+}
+
+.google-auth-btn img {
+  width: 20px;
+  height: 20px;
+}

@@ -5,16 +5,16 @@ import { cookies } from 'next/headers';
 
 export async function POST(request) {
     try {
-        const { Username, Password } = await request.json();
+        const { email, Password } = await request.json();
 
         const db = await connect();
         const collection = db.collection('users');
 
-        const existingUser = await collection.findOne({ Username });
+        const existingUser = await collection.findOne({ email });
 
         if (!existingUser) {
             return Response.json({
-                error: 'Username does not exist'
+                error: 'Email does not exist'
             }, { status: 400 });
         }
         
@@ -27,7 +27,7 @@ export async function POST(request) {
         }
         
         const { accessToken, refreshToken } = generateAuthTokens({ 
-            username: Username,
+            username: email,
             role: existingUser.role || 'user'  // Default to 'user' if role not set
         });
         
@@ -53,7 +53,7 @@ export async function POST(request) {
         return Response.json({
             message: "User Successfully Logged In",
             user: {
-                username: Username,
+                email: email,
                 id: existingUser._id.toString(),
                 role: existingUser.role || 'user'  // Include role in response
             }
