@@ -105,20 +105,24 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
                 >
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
-                  >
-                    Find Jobs
-                  </motion.button>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg border-2 border-blue-600 hover:bg-blue-50 transition-all"
-                  >
-                    Build Resume
-                  </motion.button>
+                  <Link href="/business">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full sm:w-auto px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                    >
+                      Get Started as Recruiter
+                    </motion.button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full sm:w-auto px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg border-2 border-blue-600 hover:bg-blue-50 transition-all"
+                    >
+                      Join as Freelancer
+                    </motion.button>
+                  </Link>
                 </motion.div>
               </motion.div>
 
@@ -370,8 +374,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="py-20">
+      {/* Why Choose Us Section */}
+      <section id="features" className="py-20 bg-gradient-to-b from-white to-gray-50">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <motion.h2 
@@ -389,26 +393,35 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              We provide innovative solutions to make your job search easier and more effective
+              Empowering your career journey with cutting-edge technology
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
               {
-                title: "Smart Matching",
-                description: "AI-powered job recommendations based on your skills",
-                icon: "🎯"
+                title: "AI-Powered Matching",
+                description: "Smart algorithms that connect the right talent with the right opportunities",
+                icon: "🎯",
+                stats: "95% Match Rate"
               },
               {
-                title: "Real-time Updates",
-                description: "Get instant notifications for relevant opportunities",
-                icon: "⚡"
+                title: "Real-time Analytics",
+                description: "Detailed insights and tracking for your job search progress",
+                icon: "📊",
+                stats: "24/7 Monitoring"
               },
               {
-                title: "Career Growth",
-                description: "Access resources and tools for professional development",
-                icon: "📈"
+                title: "Smart Learning",
+                description: "Personalized skill development recommendations",
+                icon: "🧠",
+                stats: "500+ Courses"
+              },
+              {
+                title: "Global Network",
+                description: "Connect with professionals and companies worldwide",
+                icon: "🌍",
+                stats: "150+ Countries"
               }
             ].map((feature, index) => (
               <motion.div
@@ -417,22 +430,26 @@ export default function Home() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.2 }}
-                className="group"
+                className="group relative"
               >
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all">
-                  <div className="text-4xl mb-6 group-hover:scale-110 transition-transform">
+                <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all h-full">
+                  <div className="absolute -top-4 right-8 bg-blue-600 text-white text-sm font-medium px-4 py-1 rounded-full">
+                    {feature.stats}
+                  </div>
+                  <div className="text-4xl mb-6 group-hover:scale-110 transition-transform flex justify-center">
                     {feature.icon}
                   </div>
-                  <h3 className="text-2xl font-bold mb-4">{feature.title}</h3>
-                  <p className="text-gray-600">{feature.description}</p>
+                  <h3 className="text-xl font-bold mb-4 text-center">{feature.title}</h3>
+                  <p className="text-gray-600 text-center">{feature.description}</p>
                 </div>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
+
       {/* How It Works Section */}
-      <section className="py-20">
+      <section id="how-it-works" className="py-20">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
             <motion.h2 
@@ -441,7 +458,7 @@ export default function Home() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
             >
-              How It Works
+              Your Journey to Success
             </motion.h2>
             <motion.p 
               className="text-xl text-gray-600 max-w-3xl mx-auto"
@@ -450,32 +467,32 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
             >
-              Your journey to success in three simple steps
+              A simple yet powerful process to advance your career
             </motion.p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-            {/* Connection Line */}
-            <div className="hidden md:block absolute top-1/2 left-0 right-0 h-0.5 bg-blue-100 -translate-y-1/2" />
-            
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 relative">
             {[
               {
-                step: "1",
-                title: "Create Profile",
-                description: "Sign up and build your professional profile with skills and experience",
-                icon: "👤"
+                step: "01",
+                title: "Create Your Profile",
+                description: "Build your professional identity with our AI-powered profile builder",
+                icon: "👤",
+                color: "blue"
               },
               {
-                step: "2",
-                title: "Explore Jobs",
-                description: "Browse through AI-matched job recommendations tailored for you",
-                icon: "🔍"
+                step: "02",
+                title: "Set Your Goals",
+                description: "Define your career objectives and get a personalized roadmap",
+                icon: "🎯",
+                color: "purple"
               },
               {
-                step: "3",
-                title: "Apply & Connect",
-                description: "Apply to jobs and connect directly with hiring managers",
-                icon: "🤝"
+                step: "03",
+                title: "Connect & Grow",
+                description: "Match with opportunities and mentors aligned with your goals",
+                icon: "🚀",
+                color: "green"
               }
             ].map((step, index) => (
               <motion.div
@@ -486,18 +503,204 @@ export default function Home() {
                 transition={{ delay: index * 0.2 }}
                 className="relative"
               >
-                <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all border border-gray-100 relative z-10">
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+                <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100 hover:shadow-2xl transition-all">
+                  <div className={`absolute -top-4 left-8 bg-${step.color}-600 text-white font-bold px-4 py-2 rounded-xl text-lg`}>
                     {step.step}
                   </div>
-                  <div className="text-4xl mb-6 flex justify-center">
+                  <div className="text-5xl mb-6 flex justify-center mt-4">
                     {step.icon}
                   </div>
                   <h3 className="text-2xl font-bold mb-4 text-center">{step.title}</h3>
                   <p className="text-gray-600 text-center">{step.description}</p>
+                  <div className="mt-8 flex justify-center">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      className={`px-6 py-2 bg-${step.color}-100 text-${step.color}-600 rounded-lg text-sm font-medium`}
+                    >
+                      Learn More
+                    </motion.button>
+                  </div>
                 </div>
+                {index < 2 && (
+                  <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-8 text-blue-600 transform translate-x-full">
+                    →
+                  </div>
+                )}
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* AI-Powered Mentorship Section */}
+      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-16">
+            <motion.div 
+              className="flex-1"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <h2 className="text-4xl font-bold mb-6">
+                AI-Powered Mentorship
+                <span className="block text-blue-600 mt-2">& Goal Tracking</span>
+              </h2>
+              <p className="text-xl text-gray-600 mb-8">
+                Get personalized career guidance and track your professional growth with our intelligent mentorship system.
+              </p>
+              
+              {/* Feature Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+                {[
+                  {
+                    icon: "🎯",
+                    title: "Smart Goal Setting",
+                    description: "AI helps set achievable career milestones"
+                  },
+                  {
+                    icon: "🤖",
+                    title: "AI Mentor Match",
+                    description: "Connect with mentors based on your goals"
+                  },
+                  {
+                    icon: "📈",
+                    title: "Progress Analytics",
+                    description: "Track your growth with detailed insights"
+                  },
+                  {
+                    icon: "🎓",
+                    title: "Learning Paths",
+                    description: "Customized skill development roadmaps"
+                  }
+                ].map((feature, index) => (
+                  <div key={index} className="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                    <span className="text-3xl mb-4 block">{feature.icon}</span>
+                    <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                    <p className="text-gray-600">{feature.description}</p>
+                  </div>
+                ))}
+              </div>
+              
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+              >
+                Start Your Journey
+              </motion.button>
+            </motion.div>
+
+            {/* Interactive Mentorship Dashboard Preview */}
+            <motion.div 
+              className="flex-1"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+            >
+              <div className="bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
+                <div className="space-y-8">
+                  {/* Dashboard Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-2xl">👨‍🏫</span>
+                      </div>
+                      <div>
+                        <div className="font-semibold text-gray-800">Your AI Mentor</div>
+                        <div className="text-sm text-gray-500">Available 24/7</div>
+                      </div>
+                    </div>
+                    <div className="bg-green-100 px-4 py-1 rounded-full text-green-600 text-sm font-medium">
+                      Active Session
+                    </div>
+                  </div>
+
+                  {/* Goal Progress */}
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h4 className="font-semibold">Current Goals</h4>
+                      <span className="text-blue-600 text-sm">3/5 Completed</span>
+                    </div>
+                    <div className="space-y-3">
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">Learn React Advanced</span>
+                          <span className="text-green-600">85%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-green-400 rounded-full" style={{width: "85%"}}></div>
+                        </div>
+                      </div>
+                      <div className="bg-gray-50 p-4 rounded-xl">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium">System Design</span>
+                          <span className="text-blue-600">60%</span>
+                        </div>
+                        <div className="h-2 bg-gray-200 rounded-full">
+                          <div className="h-2 bg-blue-400 rounded-full" style={{width: "60%"}}></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Upcoming Goals */}
+                  <div>
+                    <h4 className="font-semibold mb-4">Upcoming Goals</h4>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl">
+                        <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center text-purple-600">
+                          <span>🎯</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">Master Cloud Architecture</div>
+                          <div className="text-sm text-gray-500">Starting Next Week</div>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          className="px-4 py-2 bg-purple-100 text-purple-600 rounded-lg text-sm font-medium"
+                        >
+                          Start
+                        </motion.button>
+                      </div>
+                      <div className="flex items-center gap-4 bg-gray-50 p-4 rounded-xl">
+                        <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-600">
+                          <span>📚</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">DevOps Fundamentals</div>
+                          <div className="text-sm text-gray-500">Planned for Q2</div>
+                        </div>
+                        <motion.button
+                          whileHover={{ scale: 1.05 }}
+                          className="px-4 py-2 bg-blue-100 text-blue-600 rounded-lg text-sm font-medium"
+                        >
+                          Plan
+                        </motion.button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div className="flex gap-4">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium"
+                    >
+                      Schedule Session
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-medium"
+                    >
+                      View Roadmap
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
         </div>
       </section>

@@ -14,6 +14,7 @@ export default function Dashboard() {
   const [jobTypeFilter, setJobTypeFilter] = useState('all');
   const [selectedJob, setSelectedJob] = useState(null);
   const [activeFilter, setActiveFilter] = useState('latest');
+  const [showMentorshipModal, setShowMentorshipModal] = useState(false);
 
   const keywords = ['All', 'Remote', 'Full-Time', 'Part-Time', 'Contract', 'Engineering', 'Design', 'Marketing'];
 
@@ -147,6 +148,45 @@ export default function Dashboard() {
             <option value="Contract">Contract</option>
             <option value="Internship">Internship</option>
           </select>
+        </div>
+      </div>
+
+      {/* AI Mentorship Section */}
+      <div className="mentorship-section">
+        <div className="mentorship-content">
+          <div className="mentorship-text">
+            <h2>AI-Powered Career Mentorship</h2>
+            <p>Get personalized career guidance, resume reviews, and interview preparation from our AI mentor.</p>
+            <div className="mentorship-features">
+              <div className="feature">
+                <span className="feature-icon">🎯</span>
+                <span>Personalized career roadmap</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">📝</span>
+                <span>Resume optimization</span>
+              </div>
+              <div className="feature">
+                <span className="feature-icon">🤝</span>
+                <span>Interview preparation</span>
+              </div>
+            </div>
+            <button 
+              className="start-mentorship-btn"
+              onClick={() => router.push('/dashboard/mentorship')}
+            >
+              Start Your Journey
+            </button>
+          </div>
+          <div className="mentorship-illustration">
+            <div className="ai-mentor-avatar">
+              {/* Placeholder for AI mentor illustration */}
+              <div className="avatar-circle">
+                <span>AI</span>
+              </div>
+              <div className="pulse-effect"></div>
+            </div>
+          </div>
         </div>
       </div>
 

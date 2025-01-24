@@ -2,11 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Nav() {
   const [isScrolled, setIsScrolled] = useState(false);
-
+  const router = useRouter();
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);
@@ -25,7 +26,7 @@ export default function Nav() {
 
   return (
     <motion.nav
-      className={`fixed w-full z-50 transition-all duration-300 ${
+      className={`fixed w-full z-50 transition-all duration-300 mb-2 ${
         isScrolled ? 'bg-white/80 backdrop-blur-lg shadow-lg py-4' : 'bg-transparent py-6'
       }`}
       initial={{ y: -100 }}
@@ -52,33 +53,25 @@ export default function Nav() {
               How It Works
             </button>
             <button
-              onClick={() => scrollToSection('scanner')}
+              onClick={() => router.push('/scanner')}
               className={`${isScrolled ? 'text-gray-600' : 'text-gray-800'} hover:text-blue-600 transition-colors`}
             >
               ATS Scanner
-            </button>
-            <button
-              onClick={() => scrollToSection('testimonials')}
-              className={`${isScrolled ? 'text-gray-600' : 'text-gray-800'} hover:text-blue-600 transition-colors`}
-            >
-              Testimonials
             </button>
           </div>
 
           <div className="flex items-center space-x-4">
             <Link
-              href="/auth"
-              className={`${
-                isScrolled ? 'text-gray-600' : 'text-gray-800'
-              } hover:text-blue-600 transition-colors`}
+              href="/business"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-colors shadow-lg hover:shadow-xl"
             >
-              Login
+              For Recruiters
             </Link>
             <Link
-              href="/auth"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full transition-colors shadow-lg hover:shadow-xl"
+              href="/dashboard"
+              className="bg-white hover:bg-blue-50 text-blue-600 px-6 py-2 rounded-xl transition-colors border-2 border-blue-600"
             >
-              Sign Up
+              For Freelancers
             </Link>
           </div>
         </div>
