@@ -31,7 +31,7 @@ export async function GET(request) {
                 httpOnly: true,
                 secure: process.env.NODE_ENV === 'production',
                 sameSite: 'lax',
-                maxAge: 15  // 15 seconds
+                maxAge: 300  // 5 minutes in seconds
             });
 
             return Response.json({

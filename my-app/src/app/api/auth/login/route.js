@@ -39,7 +39,7 @@ export async function POST(request) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 15  // 15 seconds
+            maxAge: 300  // 5 minutes in seconds
         });
 
         // Set refresh token cookie
@@ -47,7 +47,7 @@ export async function POST(request) {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'lax',
-            maxAge: 45  // 45 seconds
+            maxAge: 900  // 15 minutes in seconds
         });
 
         return Response.json({

@@ -994,3 +994,75 @@ tr:last-child td {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+.business-page {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+}
+
+.business-header {
+  background-color: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.header-content {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 1rem;
+}
+
+.header-left h1 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.business-main {
+  max-width: 1280px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 640px) {
+  .header-content {
+    padding: 0 0.5rem;
+  }
+
+  .header-left h1 {
+    font-size: 1.25rem;
+  }
+
+  .business-main {
+    margin: 1rem auto;
+    padding: 0 0.5rem;
+  }
+}
+
+.no-jobs-message {
+  padding: 3rem;
+  text-align: center;
+  background: #f9fafb;
+  border-radius: 0.5rem;
+  margin: 1rem 0;
+}
+
+.no-jobs-message p {
+  color: #6b7280;
+  font-size: 1rem;
+  line-height: 1.5;
+  margin: 0;
+}

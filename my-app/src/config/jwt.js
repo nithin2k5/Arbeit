@@ -11,11 +11,11 @@ if(!ACCESS_TOKEN || !REFRESH_TOKEN){
 }
 
 export const generateAccessToken=(payload)=>{
-    return jwt.sign(payload,ACCESS_TOKEN,{expiresIn:'15s'});
+    return jwt.sign(payload,ACCESS_TOKEN,{expiresIn:'5m'});
 }
 
 export const generateRefreshToken=(payload)=>{
-    return jwt.sign(payload,REFRESH_TOKEN,{expiresIn:'45s'});
+    return jwt.sign(payload,REFRESH_TOKEN,{expiresIn:'15m'});
 }
 
 export const generateAuthTokens=(payload)=>{
