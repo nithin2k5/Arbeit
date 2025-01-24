@@ -63,7 +63,7 @@ export default function DashboardPage() {
   ];
 
   const handleApply = (job) => {
-    router.push(`/apply?job=${job.id}`);
+    router.push(`/dashboard/apply?job=${job.id}`);
   };
 
   return (
