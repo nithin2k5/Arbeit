@@ -344,7 +344,7 @@ export default function BusinessDashboard() {
       <header className="business-header">
         <div className="header-content">
           <div className="header-left">
-            <h1>{companyEmail}'s Dashboard</h1>
+            <h1>Business Dashboard</h1>
           </div>
           <div className="header-right">
             <LogoutButton />
@@ -354,7 +354,7 @@ export default function BusinessDashboard() {
       <main className="business-main">
         <div className="dashboard-container">
           <header className="dashboard-header">
-            <h1>{companyEmail}'s Dashboard</h1>
+            <h1>Business Dashboard</h1>
             <button className="primary-btn" onClick={() => setShowModal(true)}>+ Post New Job</button>
           </header>
 

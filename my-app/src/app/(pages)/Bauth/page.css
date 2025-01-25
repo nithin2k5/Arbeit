@@ -28,19 +28,72 @@ body {
     border-radius: 20px;
     overflow: hidden;
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    min-height: 600px;
+  }
+  
+  @keyframes floatAnimation {
+    0% {
+      transform: translate(-50%, -50%);
+    }
+    50% {
+      transform: translate(-50%, -55%);
+    }
+    100% {
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+  @keyframes pulsePattern {
+    0% {
+      opacity: 0.1;
+    }
+    50% {
+      opacity: 0.15;
+    }
+    100% {
+      opacity: 0.1;
+    }
+  }
+  
+  @keyframes gradientAnimation {
+    0% {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+    50% {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+    }
+    100% {
+      background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+  }
+  
+  @keyframes floatingElements {
+    0% {
+      transform: translateY(0) rotate(0deg);
+    }
+    50% {
+      transform: translateY(-15px) rotate(5deg);
+    }
+    100% {
+      transform: translateY(0) rotate(0deg);
+    }
   }
   
   .auth-image {
-    flex: 1;
-    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-    padding: 40px;
+    flex: 1.2;
+    background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
     position: relative;
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 600px;
+    padding: 0;
+    overflow: hidden;
   }
   
   @media (min-width: 768px) {
     .auth-image {
-      display: block;
+      display: flex;
     }
   }
   
@@ -51,27 +104,56 @@ body {
     right: 0;
     bottom: 0;
     opacity: 0.1;
-    background-image: radial-gradient(#fff 1px, transparent 1px);
-    background-size: 20px 20px;
+    background-image: 
+      radial-gradient(#fff 1px, transparent 1px),
+      linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    background-size: 20px 20px, 200% 100%;
+    animation: 
+      pulsePattern 4s ease-in-out infinite,
+      shine 8s linear infinite;
+    pointer-events: none;
+    mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
+    -webkit-mask-image: radial-gradient(circle at center, black 30%, transparent 80%);
   }
   
+  /* Remove the old business elements styles */
+  .auth-image::before,
+  .auth-image::after,
+  .business-elements,
+  .business-elements::before,
+  .business-elements::after,
   .business-icon {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 200px;
-    height: 200px;
-    background-image: url('/business-icon.svg');
-    background-size: contain;
-    background-repeat: no-repeat;
-    background-position: center;
+    display: none;
+  }
+  
+  .auth-image::before,
+  .auth-image::after,
+  .business-elements,
+  .business-elements::before,
+  .business-elements::after,
+  .business-icon {
+    display: none;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
   
   .auth-card {
     flex: 1;
     padding: 40px;
     max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    animation: slideIn 0.5s ease-out forwards;
   }
   
   .auth-card h2 {
@@ -252,9 +334,30 @@ body {
     --toastify-color-error: #ef4444;
   }
   
+  @media (max-width: 1200px) {
+    .auth-image {
+      min-width: 500px;
+    }
+  }
+  
   @media (max-width: 1024px) {
     .auth-container {
-      height: 100vh;
+      min-height: 500px;
+    }
+    
+    .auth-image {
+      min-width: 450px;
+    }
+  }
+  
+  @media (max-width: 900px) {
+    .auth-image {
+      display: none;
+    }
+    
+    .auth-card {
+      max-width: 100%;
+      padding: 30px;
     }
   }
   
@@ -270,8 +373,8 @@ body {
     }
   
     .auth-image {
+      min-width: 0;
       padding: 30px;
-      min-height: 200px;
     }
   
     .auth-card {

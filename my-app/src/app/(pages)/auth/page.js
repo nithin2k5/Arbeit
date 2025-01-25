@@ -93,40 +93,21 @@ export default function AuthPage() {
     
     try {
       const formData = new FormData(e.target);
+      const formEmail = formData.get('email');
+      const formPassword = formData.get('password');
       
-      if (!verificationStep) {
-        const formEmail = formData.get('email');
-        const formPassword = formData.get('password');
-        
-        if (!formEmail || !formPassword) {
-          throw new Error('Please fill in all fields');
-        }
-        
-        setEmail(formEmail);
-        setPassword(formPassword);
-        const sent = await sendVerificationCode(formEmail);
-        if (sent) {
-          setVerificationStep(true);
-        }
-      } else {
-        const code = formData.get('verificationCode');
-        if (!code) {
-          throw new Error('Please enter verification code');
-        }
-        
-        const verified = await verifyCode(email, code);
-        
-        if (verified) {
-          const response = await login(email, password);
-          if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.error || 'Login failed');
-          }
-          
-          toast.success('Login successful!');
-          router.replace('/');
-        }
+      if (!formEmail || !formPassword) {
+        throw new Error('Please fill in all fields');
       }
+
+      const response = await login(formEmail, formPassword);
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
+      }
+      
+      toast.success('Login successful!');
+      router.replace('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to login');
     } finally {
@@ -231,6 +212,7 @@ export default function AuthPage() {
                 className={`auth-tab ${isLogin ? 'active' : ''}`}
                 onClick={() => setIsLogin(true)}
                 type="button"
+
               >
                 Login
               </button>
@@ -244,28 +226,7 @@ export default function AuthPage() {
             </div>
 
             <form className="auth-form" onSubmit={isLogin ? handleLogin : handleSignup}>
-              {isLogin && verificationStep ? (
-                <div className="form-group">
-                  <label htmlFor="verificationCode">Verification Code</label>
-                  <input
-                    type="text"
-                    id="verificationCode"
-                    name="verificationCode"
-                    placeholder="Enter 6-digit code"
-                    required
-                    pattern="[0-9]{6}"
-                    maxLength={6}
-                  />
-                  <button 
-                    type="button" 
-                    className="resend-code-btn"
-                    onClick={() => sendVerificationCode(email)}
-                    disabled={loading || countdown > 0}
-                  >
-                    {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
-                  </button>
-                </div>
-              ) : (
+              {isLogin ? (
                 <>
                   <div className="form-group">
                     <label htmlFor="email">Email</label>
@@ -289,25 +250,73 @@ export default function AuthPage() {
                       minLength={6}
                     />
                   </div>
-
-                  {!isLogin && (
+                </>
+              ) : (
+                <>
+                  {verificationStep ? (
                     <div className="form-group">
-                      <label htmlFor="confirmPassword">Confirm Password</label>
+                      <label htmlFor="verificationCode">Verification Code</label>
                       <input
-                        type="password"
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        placeholder="Confirm your password"
+                        type="text"
+                        id="verificationCode"
+                        name="verificationCode"
+                        placeholder="Enter 6-digit code"
                         required
-                        minLength={6}
+                        pattern="[0-9]{6}"
+                        maxLength={6}
                       />
+                      <button 
+                        type="button" 
+                        className="resend-code-btn"
+                        onClick={() => sendVerificationCode(email)}
+                        disabled={loading || countdown > 0}
+                      >
+                        {countdown > 0 ? `Resend Code (${countdown}s)` : 'Resend Code'}
+                      </button>
                     </div>
+                  ) : (
+                    <>
+                      <div className="form-group">
+                        <label htmlFor="email">Email</label>
+                        <input
+                          type="email"
+                          id="email"
+                          name="email"
+                          placeholder="Enter your email"
+                          required
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="password">Password</label>
+                        <input
+                          type="password"
+                          id="password"
+                          name="password"
+                          placeholder="Enter your password"
+                          required
+                          minLength={6}
+                        />
+                      </div>
+
+                      <div className="form-group">
+                        <label htmlFor="confirmPassword">Confirm Password</label>
+                        <input
+                          type="password"
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          placeholder="Confirm your password"
+                          required
+                          minLength={6}
+                        />
+                      </div>
+                    </>
                   )}
                 </>
               )}
 
               <button type="submit" className="auth-submit" disabled={loading}>
-                {loading ? 'Loading...' : (isLogin ? (verificationStep ? 'Verify Code' : 'Login') : 'Create Account')}
+                {loading ? 'Loading...' : (isLogin ? 'Login' : (verificationStep ? 'Verify Code' : 'Create Account'))}
               </button>
             </form>
 

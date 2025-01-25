@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { FaSearch, FaUser, FaTimes } from 'react-icons/fa';
 import './page.css';
 
 export default function Dashboard() {
@@ -12,6 +13,7 @@ export default function Dashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [departmentFilter, setDepartmentFilter] = useState('all');
   const [jobTypeFilter, setJobTypeFilter] = useState('all');
+  const [showNotification, setShowNotification] = useState(true);
 
   useEffect(() => {
     fetchJobs();
@@ -107,25 +109,56 @@ export default function Dashboard() {
             onChange={handleSearch}
           />
           <button className="search-button">
-            <i className="fas fa-search"></i>
+            <FaSearch />
           </button>
         </div>
 
         <div className="header-nav">
-          <Link href="/dashboard/mentorship" className="nav-link">Mentorship</Link>
+          <Link href="/dashboard/input" className="nav-link">Mentorship</Link>
           <Link href="/dashboard/resume" className="nav-link">Resume Builder</Link>
-          <Link href="/dashboard/ats-scanner" className="nav-link">ATS Scanner</Link>
+          <Link href="/scanner" className="nav-link">ATS Scanner</Link>
           <div className="profile-dropdown">
             <button className="profile-button">
-              <i className="fas fa-user"></i>
+              <FaUser />
             </button>
             <div className="dropdown-content">
-              <Link href="/settings" className="dropdown-item">Settings</Link>
+              <Link href="/dashboard/settings" className="dropdown-item">Settings</Link>
               <Link href="/auth" className="dropdown-item">Log out</Link>
             </div>
           </div>
         </div>
       </header>
+
+      {/* Notification Banner */}
+      {showNotification && (
+        <div className="notification-banner">
+          <div className="notification-content">
+            <div className="notification-left">
+              <div className="notification-icon">
+                <span className="sparkle">✨</span>
+              </div>
+              <div className="notification-text">
+                <h2>Complete your profile</h2>
+                <p>Enhance your job search experience by updating your profile details.</p>
+              </div>
+            </div>
+            <div className="notification-actions">
+              <Link href="/dashboard/settings" className="update-button">
+                Update Profile
+                <span className="arrow">→</span>
+              </Link>
+              <button 
+                className="close-notification"
+                onClick={() => setShowNotification(false)}
+                aria-label="Close notification"
+              >
+                <FaTimes />
+              </button>
+            </div>
+          </div>
+          <div className="progress-bar"></div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="filters-header">
