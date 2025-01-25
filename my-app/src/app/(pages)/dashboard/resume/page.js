@@ -1,6 +1,5 @@
 'use client';
 import { useState, useRef } from 'react';
-import html2pdf from 'html2pdf.js';
 import './page.css';
 
 const GenerateResume = () => {
@@ -104,8 +103,10 @@ const GenerateResume = () => {
     { number: 5, label: 'Skills' }
   ];
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const element = resumeRef.current;
+    const html2pdf = (await import('html2pdf.js')).default;
+    
     const opt = {
       margin: [10, 10],
       filename: `${formData.fullName.trim() || 'resume'}.pdf`,
