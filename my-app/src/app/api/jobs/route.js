@@ -19,7 +19,9 @@ async function generateUniqueJobId(db) {
 
 export async function GET() {
   try {
+    console.log('Connecting to database...');
     const db = await connect();
+    console.log('Connected to database, fetching jobs...');
     const jobs = await db.collection('jobs')
       .find({ 
         status: 'Active' // Only return active jobs
@@ -30,6 +32,7 @@ export async function GET() {
         jobId: 1,
         title: 1,
         companyName: 1,
+        businessName: 1,
         location: 1,
         jobType: 1,
         department: 1,
@@ -43,12 +46,18 @@ export async function GET() {
         postedDate: 1,
         status: 1,
         applicants: 1,
-        // Exclude sensitive fields like companyEmail, bid, etc.
       })
       .sort({ postedDate: -1 })
       .toArray();
     
-    return NextResponse.json(jobs);
+    // Transform the jobs to include company name from businessName if needed
+    const transformedJobs = jobs.map(job => ({
+      ...job,
+      company: job.businessName || job.companyName || 'Company Name Not Available'
+    }));
+    
+    console.log('Found jobs:', transformedJobs.length);
+    return NextResponse.json(transformedJobs);
   } catch (error) {
     console.error('Error fetching jobs:', error);
     return NextResponse.json({ error: 'Failed to fetch jobs' }, { status: 500 });
@@ -101,7 +110,13 @@ export async function POST(request) {
         return NextResponse.json({ error: 'Job not found' }, { status: 404 });
       }
       
-      return NextResponse.json(job);
+      // Transform the job to include company name
+      const transformedJob = {
+        ...job,
+        company: job.businessName || job.companyName || 'Company Name Not Available'
+      };
+      
+      return NextResponse.json(transformedJob);
     }
     
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });

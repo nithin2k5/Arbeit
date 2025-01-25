@@ -5,15 +5,18 @@ import './page.css';
 
 const GenerateResume = () => {
   const [currentStep, setCurrentStep] = useState(1);
+  const [selectedTemplate, setSelectedTemplate] = useState('modern');
   const resumeRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: '',
+    heading: '',
     location: '',
     email: '',
     phone: '',
     website: '',
     github: '',
     linkedin: '',
+    about: '',
     summary: '',
     education: [{
       university: '',
@@ -33,6 +36,14 @@ const GenerateResume = () => {
       frameworks: ''
     }
   });
+
+  const templates = [
+    { id: 'modern', name: 'Modern', description: 'Clean and contemporary design with a focus on readability' },
+    { id: 'professional', name: 'Professional', description: 'Traditional layout perfect for corporate positions' },
+    { id: 'creative', name: 'Creative', description: 'Unique design for creative industry professionals' },
+    { id: 'minimal', name: 'Minimal', description: 'Simple and elegant design with essential information' },
+    { id: 'technical', name: 'Technical', description: 'Focused on technical skills and project details' }
+  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -86,10 +97,11 @@ const GenerateResume = () => {
   };
 
   const steps = [
-    { number: 1, label: 'Personal Info' },
-    { number: 2, label: 'Education' },
-    { number: 3, label: 'Projects' },
-    { number: 4, label: 'Skills' }
+    { number: 1, label: 'Choose Template' },
+    { number: 2, label: 'Personal Info' },
+    { number: 3, label: 'Education' },
+    { number: 4, label: 'Projects' },
+    { number: 5, label: 'Skills' }
   ];
 
   const generatePDF = () => {
@@ -124,6 +136,29 @@ const GenerateResume = () => {
 
         {currentStep === 1 && (
           <div className="form-section">
+            <h3>Choose Your Template</h3>
+            <div className="template-grid">
+              {templates.map((template) => (
+                <div
+                  key={template.id}
+                  className={`template-card ${selectedTemplate === template.id ? 'selected' : ''}`}
+                  onClick={() => setSelectedTemplate(template.id)}
+                >
+                  <div className="template-preview">
+                    <img src={`/templates/${template.id}.png`} alt={template.name} />
+                  </div>
+                  <div className="template-info">
+                    <h4>{template.name}</h4>
+                    <p>{template.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {currentStep === 2 && (
+          <div className="form-section">
             <h3>Personal Information</h3>
             <div className="form-group">
               <input
@@ -132,6 +167,16 @@ const GenerateResume = () => {
                 value={formData.fullName}
                 onChange={handleInputChange}
                 placeholder="Full Name"
+                className="input-field"
+              />
+            </div>
+            <div className="form-group">
+              <input
+                type="text"
+                name="heading"
+                value={formData.heading}
+                onChange={handleInputChange}
+                placeholder="Professional Heading (e.g., Full Stack Developer)"
                 className="input-field"
               />
             </div>
@@ -192,10 +237,20 @@ const GenerateResume = () => {
                 className="input-field"
               />
             </div>
+
+            <div className="form-group">
+              <textarea
+                name="about"
+                value={formData.about}
+                onChange={handleInputChange}
+                placeholder="Write a brief introduction about yourself..."
+                className="textarea-field"
+              />
+            </div>
           </div>
         )}
 
-        {currentStep === 2 && (
+        {currentStep === 3 && (
           <div className="form-section">
             <h3>Education</h3>
             {formData.education.map((edu, index) => (
@@ -238,7 +293,7 @@ const GenerateResume = () => {
           </div>
         )}
 
-        {currentStep === 3 && (
+        {currentStep === 4 && (
           <div className="form-section">
             <h3>Projects</h3>
             {formData.projects.map((project, index) => (
@@ -279,7 +334,7 @@ const GenerateResume = () => {
           </div>
         )}
 
-        {currentStep === 4 && (
+        {currentStep === 5 && (
           <div className="form-section">
             <h3>Technologies</h3>
             <div className="tech-inputs">
@@ -323,7 +378,7 @@ const GenerateResume = () => {
               Previous
             </button>
           )}
-          {currentStep < 4 && (
+          {currentStep < 5 && (
             <button 
               onClick={() => setCurrentStep(prev => prev + 1)}
               className="add-button"
@@ -342,80 +397,453 @@ const GenerateResume = () => {
           </button>
         </div>
         <div className="resume-preview">
-          <div className="preview-content" ref={resumeRef}>
-            <h1>{formData.fullName || 'Your Name'}</h1>
-            <div className="contact-info">
-              {formData.location && <span>{formData.location}</span>}
-              {formData.email && <span>{formData.email}</span>}
-              {formData.phone && <span>{formData.phone}</span>}
-              {formData.website && <span>{formData.website}</span>}
-            </div>
-            <div className="social-links">
-              {formData.github && <span>GitHub: {formData.github}</span>}
-              {formData.linkedin && <span>LinkedIn: {formData.linkedin}</span>}
-            </div>
-            
-            {formData.summary && (
-              <div className="resume-section">
-                <h2>Professional Summary</h2>
-                <p>{formData.summary}</p>
-              </div>
-            )}
-
-            {formData.education.length > 0 && formData.education[0].university && (
-              <div className="resume-section">
-                <h2>Education</h2>
-                {formData.education.map((edu, index) => (
-                  <div key={index} className="education-item">
-                    <div className="edu-header">
-                      <h3>{edu.university}</h3>
-                      <span>{edu.duration}</span>
-                    </div>
-                    <p>{edu.degree}</p>
-                    {edu.gpa && <p>CGPA: {edu.gpa}</p>}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {formData.projects.length > 0 && (
-              <div className="resume-section">
-                <h2>Projects</h2>
-                {formData.projects.map((project, index) => (
-                  <div key={index} className="project-item">
-                    <h3>{project.name}</h3>
-                    <p>{project.description}</p>
-                    {project.technologies && (
-                      <p><strong>Technologies:</strong> {project.technologies}</p>
-                    )}
-                    {project.githubUrl && (
-                      <p><strong>GitHub:</strong> {project.githubUrl}</p>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {(formData.technologies.languages || formData.technologies.frameworks) && (
-              <div className="resume-section">
-                <h2>Technologies</h2>
-                {formData.technologies.languages && (
-                  <div className="tech-item">
-                    <strong>Languages:</strong> {formData.technologies.languages}
-                  </div>
-                )}
-                {formData.technologies.frameworks && (
-                  <div className="tech-item">
-                    <strong>Frameworks & Libraries:</strong> {formData.technologies.frameworks}
-                  </div>
-                )}
-              </div>
-            )}
+          <div ref={resumeRef}>
+            {selectedTemplate === 'modern' && <ModernTemplate formData={formData} />}
+            {selectedTemplate === 'professional' && <ProfessionalTemplate formData={formData} />}
+            {selectedTemplate === 'creative' && <CreativeTemplate formData={formData} />}
+            {selectedTemplate === 'minimal' && <MinimalTemplate formData={formData} />}
+            {selectedTemplate === 'technical' && <TechnicalTemplate formData={formData} />}
           </div>
         </div>
       </div>
     </div>
   );
 };
+
+const ModernTemplate = ({ formData }) => (
+  <div className="preview-content modern-template">
+    <h1>{formData.fullName}</h1>
+    {formData.heading && <div className="heading-text">{formData.heading}</div>}
+    <div className="contact-line">
+      {formData.location && <span>{formData.location}</span>}
+      {formData.location && formData.email && " • "}
+      {formData.email && <span>{formData.email}</span>}
+      {formData.email && formData.phone && " • "}
+      {formData.phone && <span>{formData.phone}</span>}
+    </div>
+    {(formData.github || formData.linkedin) && (
+      <div className="contact-line">
+        {formData.github && <span>github.com/{formData.github}</span>}
+        {formData.github && formData.linkedin && " • "}
+        {formData.linkedin && <span>linkedin.com/in/{formData.linkedin}</span>}
+      </div>
+    )}
+
+    {formData.about && (
+      <>
+        <div className="divider-line"></div>
+        <div className="about-section">
+          <p>{formData.about}</p>
+        </div>
+      </>
+    )}
+
+    {formData.education.length > 0 && formData.education[0].university && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">EDUCATION</div>
+          {formData.education.map((edu, index) => (
+            <div key={index} className="education-item">
+              <div className="education-header">
+                <span className="education-school">{edu.university}</span>
+                <span className="education-date">{edu.duration}</span>
+              </div>
+              <div className="education-degree">{edu.degree}</div>
+              {edu.gpa && <div className="education-details">GPA: {edu.gpa}</div>}
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {formData.projects.length > 0 && formData.projects[0].name && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">PROJECTS</div>
+          {formData.projects.map((project, index) => (
+            <div key={index} className="experience-item">
+              <div className="experience-header">
+                <span className="experience-title">{project.name}</span>
+              </div>
+              <ul className="bullet-list">
+                <li>{project.description}</li>
+                {project.technologies && (
+                  <li>Built using: {project.technologies}</li>
+                )}
+                {project.githubUrl && (
+                  <li>Source code: {project.githubUrl}</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {(formData.technologies.languages || formData.technologies.frameworks) && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">TECHNICAL SKILLS</div>
+          <ul className="skills-list">
+            {formData.technologies.languages && (
+              <li><strong>Languages:</strong> {formData.technologies.languages}</li>
+            )}
+            {formData.technologies.frameworks && (
+              <li><strong>Frameworks & Tools:</strong> {formData.technologies.frameworks}</li>
+            )}
+          </ul>
+        </div>
+      </>
+    )}
+  </div>
+);
+
+const ProfessionalTemplate = ({ formData }) => (
+  <div className="preview-content professional-template">
+    <h1>{formData.fullName}</h1>
+    {formData.heading && <div className="heading-text">{formData.heading}</div>}
+    <div className="contact-line">
+      {formData.location && formData.location}
+      {formData.location && formData.email && " • "}
+      {formData.email && formData.email}
+      {formData.email && formData.phone && " • "}
+      {formData.phone && formData.phone}
+    </div>
+    {(formData.github || formData.linkedin) && (
+      <div className="contact-line">
+        {formData.github && <span>github.com/{formData.github}</span>}
+        {formData.github && formData.linkedin && " • "}
+        {formData.linkedin && <span>linkedin.com/in/{formData.linkedin}</span>}
+      </div>
+    )}
+
+    {formData.about && (
+      <>
+        <div className="divider-line"></div>
+        <div className="about-section">
+          <p>{formData.about}</p>
+        </div>
+      </>
+    )}
+
+    {formData.education.length > 0 && formData.education[0].university && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">EDUCATION</div>
+          {formData.education.map((edu, index) => (
+            <div key={index} className="education-item">
+              <div className="education-header">
+                <span className="education-school">{edu.university}</span>
+                <span className="education-date">{edu.duration}</span>
+              </div>
+              <div className="education-degree">{edu.degree}</div>
+              {edu.gpa && <div className="education-details">GPA: {edu.gpa}</div>}
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {formData.projects.length > 0 && formData.projects[0].name && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">PROJECTS</div>
+          {formData.projects.map((project, index) => (
+            <div key={index} className="experience-item">
+              <div className="experience-header">
+                <span className="experience-title">{project.name}</span>
+              </div>
+              <ul className="bullet-list">
+                <li>{project.description}</li>
+                {project.technologies && (
+                  <li>Built using: {project.technologies}</li>
+                )}
+                {project.githubUrl && (
+                  <li>Source code: {project.githubUrl}</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {(formData.technologies.languages || formData.technologies.frameworks) && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">TECHNICAL SKILLS</div>
+          <ul className="skills-list">
+            {formData.technologies.languages && (
+              <li><strong>Languages:</strong> {formData.technologies.languages}</li>
+            )}
+            {formData.technologies.frameworks && (
+              <li><strong>Frameworks & Tools:</strong> {formData.technologies.frameworks}</li>
+            )}
+          </ul>
+        </div>
+      </>
+    )}
+  </div>
+);
+
+const CreativeTemplate = ({ formData }) => (
+  <div className="preview-content creative-template">
+    <h1>{formData.fullName}</h1>
+    {formData.heading && <div className="heading-text">{formData.heading}</div>}
+    <div className="contact-line">
+      {formData.location && <span>{formData.location}</span>}
+      {formData.email && <span>{formData.email}</span>}
+      {formData.phone && <span>{formData.phone}</span>}
+    </div>
+    {(formData.github || formData.linkedin) && (
+      <div className="contact-line">
+        {formData.github && <span>github.com/{formData.github}</span>}
+        {formData.github && formData.linkedin && " • "}
+        {formData.linkedin && <span>linkedin.com/in/{formData.linkedin}</span>}
+      </div>
+    )}
+
+    {formData.about && (
+      <>
+        <div className="divider-line"></div>
+        <div className="about-section">
+          <p>{formData.about}</p>
+        </div>
+      </>
+    )}
+
+    {formData.education.length > 0 && formData.education[0].university && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">EDUCATION</div>
+          {formData.education.map((edu, index) => (
+            <div key={index} className="education-item">
+              <div className="education-header">
+                <span className="education-school">{edu.university}</span>
+                <span className="education-date">{edu.duration}</span>
+              </div>
+              <div className="education-degree">{edu.degree}</div>
+              {edu.gpa && <div className="education-details">GPA: {edu.gpa}</div>}
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {formData.projects.length > 0 && formData.projects[0].name && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">PROJECTS</div>
+          {formData.projects.map((project, index) => (
+            <div key={index} className="experience-item">
+              <div className="experience-header">
+                <span className="experience-title">{project.name}</span>
+              </div>
+              <ul className="bullet-list">
+                <li>{project.description}</li>
+                {project.technologies && (
+                  <li>Built using: {project.technologies}</li>
+                )}
+                {project.githubUrl && (
+                  <li>Source code: {project.githubUrl}</li>
+                )}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </>
+    )}
+
+    {(formData.technologies.languages || formData.technologies.frameworks) && (
+      <>
+        <div className="divider-line"></div>
+        <div className="content-section">
+          <div className="section-header">TECHNICAL SKILLS</div>
+          <ul className="skills-list">
+            {formData.technologies.languages && (
+              <li><strong>Languages:</strong> {formData.technologies.languages}</li>
+            )}
+            {formData.technologies.frameworks && (
+              <li><strong>Frameworks & Tools:</strong> {formData.technologies.frameworks}</li>
+            )}
+          </ul>
+        </div>
+      </>
+    )}
+  </div>
+);
+
+const MinimalTemplate = ({ formData }) => (
+  <div className="preview-content minimal-template">
+    <h1>{formData.fullName}</h1>
+    <div className="contact-line">
+      {formData.location && formData.location}
+      {formData.location && formData.email && " • "}
+      {formData.email && formData.email}
+      {formData.email && formData.phone && " • "}
+      {formData.phone && formData.phone}
+    </div>
+    {(formData.github || formData.linkedin) && (
+      <div className="contact-line">
+        {formData.github && <span><i className="fab fa-github"></i> github.com/{formData.github}</span>}
+        {formData.github && formData.linkedin && " • "}
+        {formData.linkedin && <span><i className="fab fa-linkedin"></i> linkedin.com/in/{formData.linkedin}</span>}
+      </div>
+    )}
+
+    {formData.about && (
+      <div className="about-section">
+        <p>{formData.about}</p>
+      </div>
+    )}
+
+    {formData.summary && (
+      <div className="content-section">
+        <div className="section-header">SUMMARY</div>
+        <p>{formData.summary}</p>
+      </div>
+    )}
+
+    {formData.education.length > 0 && formData.education[0].university && (
+      <div className="content-section">
+        <div className="section-header">EDUCATION</div>
+        {formData.education.map((edu, index) => (
+          <div key={index} className="education-item">
+            <div className="education-header">
+              <span className="education-school">{edu.university}</span>
+              <span className="education-date">{edu.duration}</span>
+            </div>
+            <div className="education-degree">{edu.degree}</div>
+            {edu.gpa && <div className="education-details">GPA: {edu.gpa}</div>}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {formData.projects.length > 0 && formData.projects[0].name && (
+      <div className="content-section">
+        <div className="section-header">PROJECTS</div>
+        {formData.projects.map((project, index) => (
+          <div key={index} className="experience-item">
+            <div className="experience-header">
+              <span className="experience-title">{project.name}</span>
+            </div>
+            <ul className="bullet-list">
+              <li>{project.description}</li>
+              {project.technologies && (
+                <li>Built using: {project.technologies}</li>
+              )}
+              {project.githubUrl && (
+                <li>Source code: {project.githubUrl}</li>
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {(formData.technologies.languages || formData.technologies.frameworks) && (
+      <div className="content-section">
+        <div className="section-header">TECHNICAL SKILLS</div>
+        <ul className="skills-list">
+          {formData.technologies.languages && (
+            <li><strong>Languages:</strong> {formData.technologies.languages}</li>
+          )}
+          {formData.technologies.frameworks && (
+            <li><strong>Frameworks & Tools:</strong> {formData.technologies.frameworks}</li>
+          )}
+        </ul>
+      </div>
+    )}
+  </div>
+);
+
+const TechnicalTemplate = ({ formData }) => (
+  <div className="preview-content technical-template">
+    <h1>{formData.fullName}</h1>
+    <div className="contact-line">
+      {formData.email && <span>{formData.email}</span>}
+      {formData.phone && <span> • {formData.phone}</span>}
+      {formData.location && <span> • {formData.location}</span>}
+    </div>
+    {formData.github && (
+      <div className="contact-line">
+        <span>github.com/{formData.github}</span>
+      </div>
+    )}
+    {formData.about && (
+      <div className="about-section">
+        <p>{formData.about}</p>
+      </div>
+    )}
+
+    {formData.summary && (
+      <div className="content-section">
+        <div className="section-header">SUMMARY</div>
+        <p>{formData.summary}</p>
+      </div>
+    )}
+
+    {formData.education.length > 0 && formData.education[0].university && (
+      <div className="content-section">
+        <div className="section-header">EDUCATION</div>
+        {formData.education.map((edu, index) => (
+          <div key={index} className="education-item">
+            <div className="education-header">
+              <span className="education-school">{edu.university}</span>
+              <span className="education-date">{edu.duration}</span>
+            </div>
+            <div className="education-degree">{edu.degree}</div>
+            {edu.gpa && <div className="education-details">GPA: {edu.gpa}</div>}
+          </div>
+        ))}
+      </div>
+    )}
+
+    {formData.projects.length > 0 && formData.projects[0].name && (
+      <div className="content-section">
+        <div className="section-header">PROJECTS</div>
+        {formData.projects.map((project, index) => (
+          <div key={index} className="experience-item">
+            <div className="experience-header">
+              <span className="experience-title">{project.name}</span>
+            </div>
+            <ul className="bullet-list">
+              <li>{project.description}</li>
+              {project.technologies && (
+                <li>Built using: {project.technologies}</li>
+              )}
+              {project.githubUrl && (
+                <li>Source code: {project.githubUrl}</li>
+              )}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )}
+
+    {(formData.technologies.languages || formData.technologies.frameworks) && (
+      <div className="content-section">
+        <div className="section-header">TECHNICAL SKILLS</div>
+        <ul className="skills-list">
+          {formData.technologies.languages && (
+            <li><strong>Languages:</strong> {formData.technologies.languages}</li>
+          )}
+          {formData.technologies.frameworks && (
+            <li><strong>Frameworks & Tools:</strong> {formData.technologies.frameworks}</li>
+          )}
+        </ul>
+      </div>
+    )}
+  </div>
+);
 
 export default GenerateResume;

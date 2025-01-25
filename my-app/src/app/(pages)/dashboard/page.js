@@ -20,11 +20,14 @@ export default function Dashboard() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
+      console.log('Fetching jobs...');
       const response = await fetch('/api/jobs');
+      console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');
       }
       const data = await response.json();
+      console.log('Fetched jobs:', data);
       setJobs(data);
     } catch (err) {
       setError(err.message);
@@ -43,13 +46,19 @@ export default function Dashboard() {
   };
 
   const filteredJobs = jobs.filter(job => {
-    if (!job || !job.title || !job.company || !job.location || !job.department || !job.jobType) {
+    console.log('Checking job:', job);
+    if (!job || !job.title || !job.location || !job.department || !job.jobType) {
+      console.log('Job missing required fields:', {
+        hasTitle: !!job?.title,
+        hasLocation: !!job?.location,
+        hasDepartment: !!job?.department,
+        hasJobType: !!job?.jobType
+      });
       return false;
     }
 
     const searchFields = [
       job.title,
-      job.company,
       job.location,
       job.department,
       job.jobType,
@@ -70,7 +79,16 @@ export default function Dashboard() {
       jobTypeFilter === 'all' || 
       job.jobType.toLowerCase() === jobTypeFilter.toLowerCase();
 
-    return matchesSearch && matchesDepartment && matchesJobType && job.status === 'Active';
+    const matches = matchesSearch && matchesDepartment && matchesJobType && (job.status === 'Active' || !job.status);
+    if (!matches) {
+      console.log('Job filtered out:', {
+        matchesSearch,
+        matchesDepartment,
+        matchesJobType,
+        isActive: job.status === 'Active' || !job.status
+      });
+    }
+    return matches;
   });
 
   return (
@@ -167,14 +185,14 @@ export default function Dashboard() {
                   <div className="job-card-header">
                     <div className="company-logo">
                       {job.logo ? (
-                        <img src={job.logo} alt={`${job.company} logo`} />
+                        <img src={job.logo} alt={`${job.companyName || job.company} logo`} />
                       ) : (
-                        <span>{job.company[0]}</span>
+                        <span>{(job.companyName || job.company || 'C')[0]}</span>
                       )}
                     </div>
                     <div className="job-info">
                       <h3>{job.title}</h3>
-                      <p className="company">{job.company}</p>
+                      <p className="company">{job.companyName || job.company || 'Company Name Not Available'}</p>
                     </div>
                     <div className="job-id">#{job.jobId}</div>
                   </div>

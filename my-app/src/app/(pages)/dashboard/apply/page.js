@@ -82,14 +82,14 @@ function ApplyForm() {
         <div className="job-overview">
           <div className="company-logo">
             {job.logo ? (
-              <img src={job.logo} alt={`${job.company} logo`} />
+              <img src={job.logo} alt={`${job.company || 'Company'} logo`} />
             ) : (
-              <span>{job.company[0]}</span>
+              <span>{(job.company || 'C')[0]}</span>
             )}
           </div>
           <div className="job-title-section">
             <h1>{job.title}</h1>
-            <div className="company-name">{job.company}</div>
+            <div className="company-name">{job.company || 'Company Name Not Available'}</div>
             <div className="job-id">#{job.jobId}</div>
           </div>
         </div>
