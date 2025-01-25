@@ -282,14 +282,15 @@ export default function Home() {
                   </div>
                 ))}
               </div>
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
-                onClick={() => router.push('/scanner')}
-              >
-                Scan Your Resume
-              </motion.button>
+              <Link href="/scanner">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                >
+                  Scan Your Resume
+                </motion.button>
+              </Link>
             </motion.div>
             
             {/* Updated ATS Scanner Preview */}
@@ -573,15 +574,15 @@ export default function Home() {
                 ))}
               </div>
               
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
-                onClick={() => router.push('/auth/UserAuth')}
-              >
-                Start Your Journey
-
-              </motion.button>
+              <Link href="/auth/UserAuth">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                >
+                  Start Your Journey
+                </motion.button>
+              </Link>
             </motion.div>
 
             {/* Interactive Mentorship Dashboard Preview */}
@@ -805,14 +806,15 @@ export default function Home() {
             >
               Join thousands of professionals who have already found their dream jobs through our platform
             </motion.p>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
-              onClick={() => router.push('/auth/UserAuth')}
-            >
-              Get Started Now
-            </motion.button>
+            <Link href="/auth/UserAuth">
+              <motion.button
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+              >
+                Get Started Now
+              </motion.button>
+            </Link>
           </div>
         </div>
       </section>
