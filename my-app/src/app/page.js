@@ -2,12 +2,10 @@
 
 import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import Nav from './components/nav/nav.js';
 import { useInView } from 'react-intersection-observer';
 import { useState, useEffect } from 'react';
 
-// Pre-calculate particle positions with fixed values to avoid hydration mismatch
 const particles = Array.from({ length: 30 }).map((_, i) => ({
   left: `${5 * i}%`,
   top: `${(7 * i) % 100}%`,
@@ -105,7 +103,7 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.8 }}
                 >
-                  <Link href="/business">
+                  <Link href="/Bauth">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -114,7 +112,7 @@ export default function Home() {
                       Get Started as Recruiter
                     </motion.button>
                   </Link>
-                  <Link href="/dashboard">
+                  <Link href="/auth">
                     <motion.button
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
@@ -288,6 +286,7 @@ export default function Home() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                onClick={() => router.push('/scanner')}
               >
                 Scan Your Resume
               </motion.button>
@@ -512,14 +511,6 @@ export default function Home() {
                   </div>
                   <h3 className="text-2xl font-bold mb-4 text-center">{step.title}</h3>
                   <p className="text-gray-600 text-center">{step.description}</p>
-                  <div className="mt-8 flex justify-center">
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      className={`px-6 py-2 bg-${step.color}-100 text-${step.color}-600 rounded-lg text-sm font-medium`}
-                    >
-                      Learn More
-                    </motion.button>
-                  </div>
                 </div>
                 {index < 2 && (
                   <div className="hidden lg:block absolute top-1/2 -right-4 w-8 h-8 text-blue-600 transform translate-x-full">
@@ -586,8 +577,10 @@ export default function Home() {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
+                onClick={() => router.push('/auth/UserAuth')}
               >
                 Start Your Journey
+
               </motion.button>
             </motion.div>
 
@@ -775,53 +768,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
-      <section className="py-20">
-        <div className="container mx-auto px-6">
-          <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow-xl p-12 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-blue-50 rounded-full -translate-y-1/2 translate-x-1/2" />
-            <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-50 rounded-full translate-y-1/2 -translate-x-1/2" />
-            
-            <div className="relative">
-              <div className="text-center mb-8">
-                <motion.h2 
-                  className="text-3xl font-bold mb-4"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                >
-                  Stay Updated with Job Alerts
-                </motion.h2>
-                <motion.p 
-                  className="text-gray-600"
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                >
-                  Get personalized job recommendations delivered to your inbox
-                </motion.p>
-              </div>
-              
-              <form className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto">
-                <input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="flex-1 px-6 py-4 rounded-xl border border-gray-200 focus:outline-none focus:border-blue-600 transition-colors"
-                />
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg shadow-blue-500/20 hover:shadow-xl hover:shadow-blue-500/30 transition-all"
-                >
-                  Subscribe
-                </motion.button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-20 bg-blue-600 relative overflow-hidden">
         <motion.div
@@ -863,6 +809,7 @@ export default function Home() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               className="px-8 py-4 bg-white text-blue-600 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all"
+              onClick={() => router.push('/auth/UserAuth')}
             >
               Get Started Now
             </motion.button>

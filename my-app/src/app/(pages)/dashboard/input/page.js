@@ -1,18 +1,52 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FaStar, FaCode, FaBriefcase, FaPalette, FaHandshake, FaHeartbeat, FaGraduationCap, FaEllipsisH, FaTimes, FaChevronDown } from 'react-icons/fa';
 import './page.css';
 
-const commonSkills = [
-  'JavaScript', 'Python', 'React', 'Node.js', 'SQL',
-  'Java', 'C++', 'AWS', 'Docker', 'Git',
-  'TypeScript', 'HTML/CSS', 'Angular', 'Vue.js', 'MongoDB',
-  'Nothing yet'
-];
+const categoryIcons = {
+  'Technical': FaCode,
+  'Business': FaBriefcase,
+  'Design': FaPalette,
+  'Soft Skills': FaHandshake,
+  'Healthcare': FaHeartbeat,
+  'Education': FaGraduationCap,
+  'Other': FaEllipsisH
+};
+
+const commonSkills = {
+  'Technical': [
+    'JavaScript', 'Python', 'React', 'Node.js', 'SQL',
+    'Java', 'C++', 'AWS', 'Docker', 'Git',
+    'TypeScript', 'HTML/CSS', 'Angular', 'Vue.js', 'MongoDB'
+  ],
+  'Business': [
+    'Project Management', 'Business Strategy', 'Data Analysis',
+    'Market Research', 'Financial Planning', 'Sales', 'Marketing'
+  ],
+  'Design': [
+    'UI/UX Design', 'Graphic Design', 'Adobe Creative Suite',
+    'Product Design', 'Figma', 'Sketch', 'Design Thinking'
+  ],
+  'Soft Skills': [
+    'Leadership', 'Communication', 'Problem Solving',
+    'Team Management', 'Public Speaking', 'Time Management'
+  ],
+  'Healthcare': [
+    'Patient Care', 'Medical Terminology', 'Clinical Research',
+    'Healthcare Administration', 'Medical Records', 'HIPAA'
+  ],
+  'Education': [
+    'Teaching', 'Curriculum Development', 'Student Assessment',
+    'Educational Technology', 'Special Education', 'Lesson Planning'
+  ],
+  'Other': ['Nothing yet']
+};
 
 export default function MentorshipInputPage() {
   const router = useRouter();
   const [isGenerating, setIsGenerating] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [formData, setFormData] = useState({
     dreamRole: '',
     selectedSkills: new Set(),
@@ -32,6 +66,12 @@ export default function MentorshipInputPage() {
         newSkills.add(skill);
       }
     }
+    setFormData({ ...formData, selectedSkills: newSkills });
+  };
+
+  const removeSkill = (skill) => {
+    const newSkills = new Set(formData.selectedSkills);
+    newSkills.delete(skill);
     setFormData({ ...formData, selectedSkills: newSkills });
   };
 
@@ -82,13 +122,21 @@ export default function MentorshipInputPage() {
 
   return (
     <div className="input-container">
+      <div className="background-blur">
+        <div className="blur-blob-1" />
+      </div>
+      
       <div className="input-content">
-        <div className="input-header">
-          <h1>Start Your Career Journey</h1>
-          <p>Let's create a personalized roadmap to help you achieve your dream role</p>
-        </div>
+        <div className="left-section">
+          <div className="input-header">
+            <button className="ai-logo">
+              <FaStar />
+              <p>AI Powered</p>
+            </button>
+            <h1>Career Compass</h1>
+            <p>Let's create your personalized career roadmap with AI-powered guidance</p>
+          </div>
 
-        <form onSubmit={handleSubmit} className="input-form">
           <div className="form-group">
             <label htmlFor="dreamRole">What's your dream role?</label>
             <input
@@ -96,59 +144,89 @@ export default function MentorshipInputPage() {
               id="dreamRole"
               value={formData.dreamRole}
               onChange={(e) => setFormData({ ...formData, dreamRole: e.target.value })}
-              placeholder="e.g. Senior Frontend Developer, AI Engineer, Product Manager"
+              placeholder="e.g. Senior Frontend Developer, Product Manager, UX Designer"
               required
               disabled={isGenerating}
             />
           </div>
 
-          <div className="form-group">
-            <label>Select your current skills</label>
-            <div className="skills-grid">
-              {commonSkills.map((skill) => (
-                <button
-                  key={skill}
-                  type="button"
-                  className={`skill-btn ${formData.selectedSkills.has(skill) ? 'active' : ''}`}
-                  onClick={() => toggleSkill(skill)}
-                  disabled={isGenerating}
-                >
-                  {skill}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {error && (
-            <div className="error-message">
-              {error}
-              {error.includes('try again') && (
-                <button 
-                  type="button" 
-                  className="retry-btn"
-                  onClick={() => setError(null)}
-                >
-                  Dismiss
-                </button>
-              )}
-            </div>
-          )}
-
           <button 
             type="submit" 
             className="primary-btn" 
             disabled={isGenerating || !formData.dreamRole}
+            onClick={handleSubmit}
           >
             {isGenerating ? (
               <>
                 <div className="btn-spinner"></div>
-                Generating Your Roadmap...
+                Creating Your Career Roadmap...
               </>
             ) : (
-              'Create My Career Roadmap'
+              <>
+                <FaStar />
+                Generate My Career Path
+              </>
             )}
           </button>
-        </form>
+        </div>
+
+        <div className="right-section">
+          <div className="form-group">
+            <label>Select your current skills</label>
+            {Object.entries(commonSkills).map(([category, skills]) => {
+              const Icon = categoryIcons[category];
+              const hasSelectedSkills = Array.from(formData.selectedSkills).some(skill => skills.includes(skill));
+              const selectedCount = Array.from(formData.selectedSkills).filter(skill => skills.includes(skill)).length;
+              
+              return (
+                <div key={category} className="skills-dropdown">
+                  <button
+                    type="button"
+                    className={`dropdown-trigger ${activeCategory === category ? 'active' : ''}`}
+                    onClick={() => setActiveCategory(activeCategory === category ? null : category)}
+                    disabled={isGenerating}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Icon />
+                      {category}
+                      {hasSelectedSkills && ` (${selectedCount})`}
+                    </span>
+                    <FaChevronDown />
+                  </button>
+                  
+                  {activeCategory === category && (
+                    <div className="dropdown-content">
+                      {skills.map((skill) => (
+                        <button
+                          key={skill}
+                          type="button"
+                          className={`skill-option ${formData.selectedSkills.has(skill) ? 'active' : ''}`}
+                          onClick={() => toggleSkill(skill)}
+                          disabled={isGenerating}
+                        >
+                          {skill}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+
+            {formData.selectedSkills.size > 0 && (
+              <div className="selected-skills">
+                {Array.from(formData.selectedSkills).map((skill) => (
+                  <div key={skill} className="skill-tag">
+                    {skill}
+                    <button onClick={() => removeSkill(skill)} disabled={isGenerating}>
+                      <FaTimes />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { Toaster, toast } from 'react-hot-toast';
+import BusinessNetwork from '@/app/components/Globe/Globe';
 import './page.css';
 
 const Bauthen = () => {
@@ -197,7 +198,7 @@ const Bauthen = () => {
 
         toast.success('Login successful! Redirecting to business dashboard...');
         setTimeout(() => {
-          window.location.href = '/business/dashboard';
+          window.location.href = '/business';
         }, 1000);
       } catch (err) {
         toast.error(err.message);
@@ -213,8 +214,7 @@ const Bauthen = () => {
       <div className="outer-container">
         <div className="auth-container">
           <div className="auth-image">
-            <div className="dots-pattern"></div>
-            <div className="business-icon"></div>
+            <BusinessNetwork />
           </div>
           <div className="auth-card">
             <h2>{isSignUp ? 'Register Your Business' : 'Business Login'}</h2>

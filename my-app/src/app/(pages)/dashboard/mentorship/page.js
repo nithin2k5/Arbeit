@@ -21,7 +21,7 @@ function parseRoadmap(text) {
         milestones.push(currentMilestone);
       }
       currentMilestone = {
-        title: section.split('\n')[0].trim(),
+        title: section.split('\n')[0].trim().replace(/^###\s*/, ''),
         goals: [],
         resources: [],
         timeEstimate: ''
@@ -235,7 +235,7 @@ export default function MentorshipPage() {
               className={`milestone-nav-item ${index === activeMilestone ? 'active' : ''}`}
               onClick={() => {
                 setActiveMilestone(index);
-                document.querySelector(`#milestone-${index}`).scrollIntoView({ behavior: 'smooth' });
+                document.querySelector(`milestone-${index}`).scrollIntoView({ behavior: 'smooth' });
               }}
             >
               <div className="milestone-nav-header">
@@ -266,7 +266,7 @@ export default function MentorshipPage() {
               localStorage.removeItem('mentorshipRoadmap');
               localStorage.removeItem('dreamRole');
               localStorage.removeItem('completedTasks');
-              router.push('/dashboard/mentorship/input');
+              router.push('/dashboard/input');
             }}
           >
             Start Over

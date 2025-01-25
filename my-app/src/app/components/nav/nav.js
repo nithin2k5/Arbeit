@@ -62,13 +62,13 @@ export default function Nav() {
 
           <div className="flex items-center space-x-4">
             <Link
-              href="/business"
+              href="/Bauth"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl transition-colors shadow-lg hover:shadow-xl"
             >
               For Recruiters
             </Link>
             <Link
-              href="/dashboard"
+              href="/auth"
               className="bg-white hover:bg-blue-50 text-blue-600 px-6 py-2 rounded-xl transition-colors border-2 border-blue-600"
             >
               For Freelancers
