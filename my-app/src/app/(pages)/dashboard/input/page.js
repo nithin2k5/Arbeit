@@ -81,7 +81,7 @@ export default function MentorshipInputPage() {
     setError(null);
 
     try {
-      const response = await fetch('/api/mentorship/roadmap', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mentorship/roadmap`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ export default function MentorshipInputPage() {
       // Store the roadmap data in localStorage
       localStorage.setItem('mentorshipRoadmap', data.roadmap);
       localStorage.setItem('dreamRole', formData.dreamRole);
-      
+
       // Navigate to the dashboard
       router.push('/dashboard/mentorship');
     } catch (err) {

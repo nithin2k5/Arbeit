@@ -81,7 +81,9 @@ const ProfilePage = () => {
 
       try {
         // Fetch profile
-        const profileResponse = await fetch('/api/profile');
+        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+          credentials: 'include'
+        });
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
           // Ensure all fields have at least default values
@@ -117,7 +119,9 @@ const ProfilePage = () => {
         }
 
         // Fetch applications
-        const applicationsResponse = await fetch('/api/applications');
+        const applicationsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+          credentials: 'include'
+        });
         if (applicationsResponse.ok) {
           const applicationsData = await applicationsResponse.json();
           setApplications(applicationsData);
@@ -242,7 +246,7 @@ const ProfilePage = () => {
     const { email, currentPassword, newPassword, confirmPassword, ...profileData } = userProfile;
 
     try {
-      const updatePromise = fetch('/api/profile', {
+      const updatePromise = fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -576,8 +580,8 @@ const ProfilePage = () => {
                         <div className="application-details">
                           <p><strong>Applied:</strong> {new Date(application.appliedDate).toLocaleDateString()}</p>
                           {application.resumeId && (
-                            <a 
-                              href={`/api/applications/${application._id}/resume`}
+                            <a
+                              href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/${application._id}/resume`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="view-resume-btn"
@@ -612,8 +616,8 @@ const ProfilePage = () => {
                   <div key={app._id} className="resume-item">
                     <span>Resume for Job #{app.jobId}</span>
                     <div className="resume-actions">
-                      <a 
-                        href={`/api/applications/${app._id}/resume`}
+                      <a
+                        href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/${app._id}/resume`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="view-btn"

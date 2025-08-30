@@ -99,7 +99,7 @@ export default function BusinessDashboard() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/business/jobs');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`);
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');
       }
@@ -115,7 +115,7 @@ export default function BusinessDashboard() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch('/api/applications');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`);
       if (!response.ok) {
         throw new Error('Failed to fetch applications');
       }
@@ -128,7 +128,9 @@ export default function BusinessDashboard() {
 
   const fetchCompanyInfo = async () => {
     try {
-      const response = await fetch('/api/business/profile');
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/profile`, {
+        credentials: 'include'
+      });
       if (response.ok) {
         const data = await response.json();
         setCompanyEmail(data.companyEmail);
@@ -160,20 +162,42 @@ export default function BusinessDashboard() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/business/jobs', {
+      // Format the data to match JobDTO structure
+      const jobData = {
+        title: newJob.title,
+        description: newJob.description,
+        location: newJob.location,
+        jobType: newJob.jobType,
+        department: newJob.department,
+        requirements: Array.isArray(newJob.requirements) ? newJob.requirements.join('\n') : newJob.requirements,
+        benefits: Array.isArray(newJob.benefits) ? newJob.benefits.join('\n') : newJob.benefits,
+        qualification: newJob.qualification,
+        salaryMin: parseFloat(newJob.salaryMin) || 0,
+        salaryMax: parseFloat(newJob.salaryMax) || 0,
+        hideSalary: newJob.hideSalary,
+        screeningQuestions: newJob.screeningQuestions,
+        hiringProcess: newJob.hiringProcess,
+        additionalInfo: newJob.additionalInfo
+      };
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(newJob),
+        credentials: 'include',
+        body: JSON.stringify(jobData),
       });
 
       if (!response.ok) {
         throw new Error('Failed to create job');
       }
 
-      const createdJob = await response.json();
-      setJobs(prev => [...prev, createdJob]);
+      const data = await response.json();
+      alert(`Job posted successfully! Job ID: ${data.jobId}`);
+
+      // Refresh jobs list
+      fetchJobs();
       setShowModal(false);
       setNewJob({
         title: '',
@@ -198,40 +222,45 @@ export default function BusinessDashboard() {
     }
   };
 
-  const handleDelete = async (_id) => {
+  const handleDelete = async (job) => {
+    const jobId = job.jobId;
     try {
-      const response = await fetch('/api/business/jobs', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ _id }),
+        credentials: 'include',
+        body: JSON.stringify({ jobId }),
       });
 
       if (!response.ok) {
         throw new Error('Failed to delete job');
       }
 
-      setJobs(prev => prev.filter(job => job._id !== _id));
+      // Refresh jobs list
+      fetchJobs();
+      alert('Job deleted successfully');
     } catch (err) {
       console.error('Error deleting job:', err);
       alert('Failed to delete job. Please try again.');
     }
   };
 
-  const handleStatusChange = async (_id) => {
+  const handleStatusChange = async (job) => {
+    const jobId = job.jobId;
     try {
-      const job = jobs.find(j => j._id === _id);
-      if (!job) return;
+      const newStatus = job.status === 'Active' ? 'Closed' : 'Active';
 
-      const response = await fetch('/api/business/jobs', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         body: JSON.stringify({
-          _id,
-          status: job.status === 'Active' ? 'Closed' : 'Active'
+          jobId,
+          status: newStatus
         }),
       });
 
@@ -239,8 +268,9 @@ export default function BusinessDashboard() {
         throw new Error('Failed to update job status');
       }
 
-      const updatedJob = await response.json();
-      setJobs(prev => prev.map(j => j._id === _id ? { ...j, ...updatedJob } : j));
+      // Refresh jobs list
+      fetchJobs();
+      alert(`Job status updated to ${newStatus}`);
     } catch (err) {
       console.error('Error updating job status:', err);
       alert('Failed to update job status. Please try again.');
@@ -306,29 +336,26 @@ export default function BusinessDashboard() {
     ],
   };
 
-  const handleUpdateStatus = async (_id, status) => {
+  const handleUpdateStatus = async (applicationId, status) => {
     try {
-      const response = await fetch('/api/applications', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ _id, status })
+        credentials: 'include',
+        body: JSON.stringify({ applicationId, status })
       });
 
       if (!response.ok) {
         throw new Error('Failed to update application status');
       }
 
-      // Update the applications list
-      setApplications(prev => 
-        prev.map(app => 
-          app._id === _id ? { ...app, status } : app
-        )
-      );
+      // Refresh applications list
+      fetchApplications();
 
       // Update the selected application if it's open in modal
-      if (selectedApplication && selectedApplication._id === _id) {
+      if (selectedApplication && selectedApplication.applicationId === applicationId) {
         setSelectedApplication(prev => ({ ...prev, status }));
       }
 
@@ -903,7 +930,7 @@ export default function BusinessDashboard() {
                     </thead>
                     <tbody>
                       {filteredJobs.map((job) => (
-                        <tr key={job._id}>
+                        <tr key={job.jobId}>
                           <td>#{job.jobId}</td>
                           <td>{job.title}</td>
                           <td>{job.department}</td>
@@ -913,28 +940,28 @@ export default function BusinessDashboard() {
                               {job.status}
                             </span>
                           </td>
-                          <td>{job.applicants}</td>
+                          <td>{job.applicants || 0}</td>
                           <td>{new Date(job.postedDate).toLocaleDateString()}</td>
                           <td>
                             <div className="action-buttons">
-                              <button 
-                                className="icon-btn" 
+                              <button
+                                className="icon-btn"
                                 title="View Details"
                                 onClick={() => handleViewDetails(job)}
                               >
                                 👁️
                               </button>
-                              <button 
-                                className="icon-btn" 
+                              <button
+                                className="icon-btn"
                                 title={job.status === 'Active' ? 'Close Job' : 'Reopen Job'}
-                                onClick={() => handleStatusChange(job._id)}
+                                onClick={() => handleStatusChange(job)}
                               >
                                 {job.status === 'Active' ? '🔒' : '🔓'}
                               </button>
-                              <button 
-                                className="icon-btn" 
+                              <button
+                                className="icon-btn"
                                 title="Delete Job"
-                                onClick={() => handleDelete(job._id)}
+                                onClick={() => handleDelete(job)}
                               >
                                 🗑️
                               </button>

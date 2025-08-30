@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Modal component
 function Modal({ isOpen, onClose, children }) {
@@ -125,70 +124,48 @@ export default function ScannerPage() {
 
     setLoading(true);
     setError(null);
-    
+
     try {
       // Extract text from PDF
       const fileContent = await extractTextFromPDF(file);
-      
+
       if (!fileContent || fileContent.trim().length === 0) {
         throw new Error('Could not extract text from the PDF. Please make sure it\'s a text-based PDF and not a scanned image.');
       }
 
-      // Initialize Gemini AI with proper error handling
-      if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-        throw new Error('Gemini API key is not configured');
+      // Send to backend for analysis
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/scanner/analyze`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          resumeText: fileContent
+        })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to analyze resume');
       }
 
-      const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: 'gemini-pro' });
+      if (!data.analysis) {
+        throw new Error('No analysis data received');
+      }
 
-      // Prepare the prompt
-      const prompt = `You are an expert ATS (Applicant Tracking System) analyzer. Analyze this resume and provide detailed feedback in the following format:
+      setResult(data.analysis);
 
-      OVERALL SCORE: [Score out of 100]
-
-      KEY STRENGTHS:
-      - [Strength 1]
-      - [Strength 2]
-      - [Strength 3]
-
-      AREAS FOR IMPROVEMENT:
-      - [Area 1]
-      - [Area 2]
-      - [Area 3]
-
-      KEYWORD OPTIMIZATION:
-      - Missing Important Keywords: [List keywords]
-      - Suggested Keywords to Add: [List keywords]
-
-      FORMAT AND STRUCTURE:
-      - [Feedback on format]
-      - [Feedback on structure]
-      - [Feedback on readability]
-
-      RECOMMENDATIONS:
-      1. [Specific recommendation 1]
-      2. [Specific recommendation 2]
-      3. [Specific recommendation 3]
-
-      Resume content to analyze:
-      ${fileContent}`;
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const formattedText = response.text().replace(/\*\*/g, '');
-      setResult(formattedText);
-      
     } catch (error) {
       console.error('Error analyzing resume:', error);
-      if (error.message?.includes('429') || error.message?.includes('quota')) {
-        setError('API rate limit reached. Please try again in a few minutes.');
-      } else if (error.message?.includes('API key')) {
-        setError('Gemini API key is not properly configured. Please check your environment settings.');
-      } else if (error.message?.includes('scanned image')) {
+      if (error.message?.includes('scanned image')) {
         setError('Could not extract text from the PDF. Please make sure it\'s a text-based PDF and not a scanned image.');
       } else if (error.message?.includes('PDF')) {
         setError('Error reading PDF file. Please make sure it\'s a valid PDF document.');
+      } else if (error.message?.includes('configuration error')) {
+        setError('AI service is not properly configured. Please try again later.');
+      } else if (error.message?.includes('temporarily unavailable')) {
+        setError('AI service is temporarily unavailable. Please try again in a few minutes.');
       } else {
         setError('Error analyzing resume. Please try again or contact support if the issue persists.');
       }

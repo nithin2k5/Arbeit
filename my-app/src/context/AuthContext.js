@@ -58,7 +58,7 @@ export function AuthProvider({children}) {
 
     const login = async(email, password) => {
         try {
-            const response = await fetch('/api/auth/login', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, Password: password }),
@@ -79,9 +79,10 @@ export function AuthProvider({children}) {
 
     const logout = async() => {
         try{
-            const response = await fetch('/api/auth/logout', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
             });
 
             if (response.ok) {
@@ -100,7 +101,7 @@ export function AuthProvider({children}) {
 
     const register = async(email, password) => {
         try {
-            const response = await fetch('/api/auth/register', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, Password: password }),
@@ -121,11 +122,12 @@ export function AuthProvider({children}) {
 
     const refreshToken = async () => {
         try {
-            const response = await fetch("/api/auth/refresh", {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
+                credentials: 'include'
             });
-    
+
             if (!response.ok) {
                 return new Response(JSON.stringify({ error: 'Token refresh failed' }), {
                     status: response.status,
@@ -145,13 +147,13 @@ export function AuthProvider({children}) {
 
     const signInWithGoogle = async () => {
         try {
-            const response = await fetch('/api/auth/google-signin', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google-signin`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json();
                 console.error('Google sign-in failed:', errorData);

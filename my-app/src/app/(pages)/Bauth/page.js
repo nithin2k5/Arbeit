@@ -43,7 +43,7 @@ const Bauthen = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/verify-email', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -74,7 +74,7 @@ const Bauthen = () => {
 
     try {
       setLoading(true);
-      const response = await fetch('/api/auth/verify-email', {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/verify-email`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -121,7 +121,7 @@ const Bauthen = () => {
         setLoading(true);
         
         // Proceed with registration directly since OTP is already verified
-        const response = await fetch('/api/auth/business/register', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -179,7 +179,7 @@ const Bauthen = () => {
 
       try {
         setLoading(true);
-        const response = await fetch('/api/auth/business/login', {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/login`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
