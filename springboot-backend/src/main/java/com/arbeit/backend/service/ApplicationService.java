@@ -5,13 +5,14 @@ import com.arbeit.backend.model.Application;
 import com.arbeit.backend.model.Job;
 import com.arbeit.backend.repository.ApplicationRepository;
 import com.arbeit.backend.repository.JobRepository;
-import com.mongodb.client.gridfs.GridFSBucket;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.List;
@@ -68,9 +69,9 @@ public class ApplicationService {
         // Handle resume upload if provided
         if (applicationDTO.getResume() != null && !applicationDTO.getResume().isEmpty()) {
             try {
-                String resumeId = saveResumeToGridFS(applicationDTO.getResume(), userId);
-                application.setResumeId(resumeId);
-                application.setResumeFileName(userId + "_resume.pdf");
+                String resumeFileName = saveResumeToFileSystem(applicationDTO.getResume(), userId);
+                application.setResumeFileName(resumeFileName);
+                application.setResumeId(resumeFileName); // Store filename as ID for simplicity
             } catch (Exception e) {
                 // Log error but don't fail the application
                 System.err.println("Failed to save resume: " + e.getMessage());
@@ -89,7 +90,7 @@ public class ApplicationService {
         return applicationRepository.findAllByOrderByAppliedDateDesc();
     }
 
-    public Application updateApplicationStatus(String applicationId, String status) {
+    public Application updateApplicationStatus(Long applicationId, String status) {
         Optional<Application> applicationOpt = applicationRepository.findById(applicationId);
         if (applicationOpt.isEmpty()) {
             throw new RuntimeException("Application not found");
@@ -114,20 +115,24 @@ public class ApplicationService {
         return applicationRepository.findByUserId(userId);
     }
 
-    private String saveResumeToGridFS(String resumeData, String userId) throws IOException {
+    private String saveResumeToFileSystem(String resumeData, String userId) throws IOException {
         // Assuming resumeData is Base64 encoded PDF
         byte[] resumeBytes = Base64.getDecoder().decode(resumeData);
 
-        // Create GridFS upload stream
-        com.mongodb.client.gridfs.model.GridFSUploadOptions options =
-            new com.mongodb.client.gridfs.model.GridFSUploadOptions()
-                .chunkSizeBytes(1024)
-                .metadata(new org.bson.Document("userId", userId)
-                    .append("uploadDate", LocalDateTime.now()));
+        // Create uploads/resumes directory if it doesn't exist
+        Path uploadDir = Paths.get("uploads", "resumes");
+        if (!Files.exists(uploadDir)) {
+            Files.createDirectories(uploadDir);
+        }
 
-        // Upload to GridFS
-        return gridFSBucket.uploadFromStream(userId + "_resume.pdf",
-            new java.io.ByteArrayInputStream(resumeBytes), options).toString();
+        // Create file path
+        String fileName = userId + "_resume.pdf";
+        Path filePath = uploadDir.resolve(fileName);
+
+        // Save file to file system
+        Files.copy(new java.io.ByteArrayInputStream(resumeBytes), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return fileName;
     }
 
     private String generateUniqueUserId() {
@@ -135,7 +140,7 @@ public class ApplicationService {
         do {
             // Generate a random 3-digit number
             userId = String.valueOf(100 + (int)(Math.random() * 900));
-        } while (applicationRepository.findByUserId(userId).stream().findFirst().isPresent());
+        } while (!applicationRepository.findByUserId(userId).isEmpty());
 
         return userId;
     }

@@ -6,10 +6,6 @@ import com.arbeit.backend.model.Job;
 import com.arbeit.backend.repository.CompanyRepository;
 import com.arbeit.backend.repository.JobRepository;
 import com.arbeit.backend.security.JwtUtils;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,13 +18,11 @@ public class JobService {
     private final JobRepository jobRepository;
     private final CompanyRepository companyRepository;
     private final JwtUtils jwtUtils;
-    private final MongoTemplate mongoTemplate;
 
-    public JobService(JobRepository jobRepository, CompanyRepository companyRepository, JwtUtils jwtUtils, MongoTemplate mongoTemplate) {
+    public JobService(JobRepository jobRepository, CompanyRepository companyRepository, JwtUtils jwtUtils) {
         this.jobRepository = jobRepository;
         this.companyRepository = companyRepository;
         this.jwtUtils = jwtUtils;
-        this.mongoTemplate = mongoTemplate;
     }
 
     public List<Job> getAllActiveJobs() {
@@ -143,9 +137,12 @@ public class JobService {
     }
 
     public void incrementApplicantCount(String jobId) {
-        Query query = new Query(Criteria.where("jobId").is(jobId));
-        Update update = new Update().inc("applicants", 1);
-        mongoTemplate.updateFirst(query, update, Job.class);
+        Optional<Job> jobOpt = jobRepository.findByJobId(jobId);
+        if (jobOpt.isPresent()) {
+            Job job = jobOpt.get();
+            job.setApplicants(job.getApplicants() + 1);
+            jobRepository.save(job);
+        }
     }
 
     private String generateUniqueJobId() {

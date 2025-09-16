@@ -1,13 +1,9 @@
 package com.arbeit.backend.service;
 
-import com.mongodb.client.gridfs.GridFSBucket;
-import com.mongodb.client.gridfs.model.GridFSUploadOptions;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,28 +16,8 @@ public class FileService {
     @Value("${app.upload.resume-dir}")
     private String resumeDir;
 
-    private final GridFSBucket gridFSBucket;
-
-    public FileService(GridFSBucket gridFSBucket) {
-        this.gridFSBucket = gridFSBucket;
-    }
-
-    public String saveResumeToGridFS(MultipartFile file, String userId) throws IOException {
-        String fileName = userId + "_resume_" + file.getOriginalFilename();
-
-        GridFSUploadOptions options = new GridFSUploadOptions()
-                .chunkSizeBytes(1024)
-                .metadata(new org.bson.Document("userId", userId)
-                        .append("originalFileName", file.getOriginalFilename())
-                        .append("contentType", file.getContentType()));
-
-        ObjectId fileId = gridFSBucket.uploadFromStream(
-                fileName,
-                new ByteArrayInputStream(file.getBytes()),
-                options
-        );
-
-        return fileId.toString();
+    public FileService() {
+        // Default constructor
     }
 
     public String saveResumeToFileSystem(MultipartFile file, String userId) throws IOException {
@@ -61,15 +37,19 @@ public class FileService {
         return fileName;
     }
 
-    public byte[] downloadResumeFromGridFS(String fileId) throws IOException {
-        ObjectId objectId = new ObjectId(fileId);
-        return gridFSBucket.downloadToStream(objectId, new java.io.ByteArrayOutputStream())
-                .toByteArray();
+    public byte[] downloadResumeFromFileSystem(String fileName) throws IOException {
+        Path filePath = Paths.get(resumeDir, fileName);
+        return Files.readAllBytes(filePath);
     }
 
-    public void deleteResumeFromGridFS(String fileId) {
-        ObjectId objectId = new ObjectId(fileId);
-        gridFSBucket.delete(objectId);
+    public void deleteResumeFromFileSystem(String fileName) {
+        try {
+            Path filePath = Paths.get(resumeDir, fileName);
+            Files.deleteIfExists(filePath);
+        } catch (IOException e) {
+            // Log error but don't throw
+            System.err.println("Failed to delete file: " + e.getMessage());
+        }
     }
 
     public boolean isValidResumeFile(MultipartFile file) {

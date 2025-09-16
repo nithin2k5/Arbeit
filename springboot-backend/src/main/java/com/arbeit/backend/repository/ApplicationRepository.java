@@ -1,15 +1,14 @@
 package com.arbeit.backend.repository;
 
 import com.arbeit.backend.model.Application;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ApplicationRepository extends MongoRepository<Application, String> {
+public interface ApplicationRepository extends JpaRepository<Application, Long> {
 
     Optional<Application> findByUserIdAndJobId(String userId, String jobId);
 
@@ -19,7 +18,6 @@ public interface ApplicationRepository extends MongoRepository<Application, Stri
 
     List<Application> findByStatus(String status);
 
-    @Query(sort = "{ 'appliedDate': -1 }")
     List<Application> findAllByOrderByAppliedDateDesc();
 
     boolean existsByUserIdAndJobId(String userId, String jobId);

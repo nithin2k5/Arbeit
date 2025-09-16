@@ -21,12 +21,13 @@ public class AuthResponse {
         this.role = role;
     }
 
-    public AuthResponse(String message, String bid, String email, String role) {
-        this.message = message;
-        this.bid = bid;
-        this.email = email;
-        this.role = role;
-    }
+    // Temporarily removed duplicate constructor
+    // public AuthResponse(String message, String email, String role, String bid) {
+    //     this.message = message;
+    //     this.bid = bid;
+    //     this.email = email;
+    //     this.role = role;
+    // }
 
     public String getMessage() {
         return message;

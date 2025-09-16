@@ -1,20 +1,19 @@
 package com.arbeit.backend.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.Indexed;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Document(collection = "applications")
+@Entity
+@Table(name = "applications")
 public class Application {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String userId; // 3-digit unique identifier for the applicant
 
-    @Indexed
+    @Column(nullable = false)
     private String jobId; // Job being applied for
 
     // Applicant Information
@@ -59,11 +58,11 @@ public class Application {
     }
 
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -255,7 +254,7 @@ public class Application {
     @Override
     public String toString() {
         return "Application{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", userId='" + userId + '\'' +
                 ", jobId='" + jobId + '\'' +
                 ", email='" + email + '\'' +

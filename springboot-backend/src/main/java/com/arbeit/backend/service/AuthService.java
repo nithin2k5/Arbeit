@@ -2,6 +2,7 @@ package com.arbeit.backend.service;
 
 import com.arbeit.backend.dto.AuthRequest;
 import com.arbeit.backend.dto.AuthResponse;
+import com.arbeit.backend.dto.LoginResponse;
 import com.arbeit.backend.dto.UserRegistrationRequest;
 import com.arbeit.backend.model.User;
 import com.arbeit.backend.repository.UserRepository;

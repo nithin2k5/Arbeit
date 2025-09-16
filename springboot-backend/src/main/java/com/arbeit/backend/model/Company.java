@@ -1,23 +1,22 @@
 package com.arbeit.backend.model;
 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.index.Indexed;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
-@Document(collection = "companies")
+@Entity
+@Table(name = "companies")
 public class Company {
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String bid; // Business ID (e.g., "B1234")
 
     private String name; // Contact person's name
     private String email; // Contact person's email
 
-    @Indexed(unique = true)
+    @Column(unique = true, nullable = false)
     private String companyEmail; // Company's official email
 
     private String companyName;
@@ -61,11 +60,11 @@ public class Company {
     }
 
     // Getters and Setters
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
@@ -272,7 +271,7 @@ public class Company {
     @Override
     public String toString() {
         return "Company{" +
-                "id='" + id + '\'' +
+                "id=" + id +
                 ", bid='" + bid + '\'' +
                 ", companyEmail='" + companyEmail + '\'' +
                 ", companyName='" + companyName + '\'' +

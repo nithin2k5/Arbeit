@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.FileSystemResource;
 
 import java.util.Base64;
 import java.util.List;
@@ -56,14 +54,15 @@ public class ApplicationController {
     @PutMapping
     public ResponseEntity<?> updateApplicationStatus(@RequestBody Map<String, String> request) {
         try {
-            String applicationId = request.get("_id");
+            String applicationIdStr = request.get("id"); // Changed from "_id" to "id" for MySQL
             String status = request.get("status");
 
-            if (applicationId == null || status == null) {
+            if (applicationIdStr == null || status == null) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("error", "Application ID and status are required"));
             }
 
+            Long applicationId = Long.parseLong(applicationIdStr);
             Application updatedApplication = applicationService.updateApplicationStatus(applicationId, status);
             return ResponseEntity.ok(updatedApplication);
         } catch (RuntimeException e) {
@@ -72,36 +71,6 @@ public class ApplicationController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Failed to update application status"));
-        }
-    }
-
-    @GetMapping("/{applicationId}/resume")
-    public ResponseEntity<?> downloadResume(@PathVariable String applicationId) {
-        try {
-            Optional<Application> applicationOpt = applicationService.getApplicationById(applicationId);
-            if (applicationOpt.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Application not found"));
-            }
-
-            Application application = applicationOpt.get();
-            if (application.getResumePath() == null || application.getResumePath().isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Resume not found"));
-            }
-
-            Resource resource = new FileSystemResource(application.getResumePath());
-            if (!resource.exists()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("error", "Resume file not found"));
-            }
-
-            return ResponseEntity.ok()
-                    .header("Content-Disposition", "attachment; filename=\"" + application.getResumeFilename() + "\"")
-                    .body(resource);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "Failed to download resume"));
         }
     }
 }
