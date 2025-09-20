@@ -71,6 +71,20 @@ const ProfilePage = () => {
     }
   }, [user?.email]);
 
+  // Authentication check
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        router.replace('/auth');
+        return;
+      }
+      if (user.role !== 'user') {
+        router.replace('/Bauth');
+        return;
+      }
+    }
+  }, [user, isLoading, router]);
+
   // Fetch profile data only when user is authenticated
   useEffect(() => {
     const fetchData = async () => {
@@ -86,35 +100,34 @@ const ProfilePage = () => {
         });
         if (profileResponse.ok) {
           const profileData = await profileResponse.json();
-          // Ensure all fields have at least default values
-          setUserProfile(prev => ({
-            ...prev, // Keep default values
-            ...profileData, // Override with server data
-            email: user.email, // Always use email from auth context
-            // Ensure arrays are initialized
+          // Transform backend data to frontend format
+          const transformedData = {
+            fullName: `${profileData.firstName || ''} ${profileData.lastName || ''}`.trim(),
+            phone: profileData.phone || '',
+            location: profileData.address || '',
+            city: profileData.city || '',
+            state: profileData.state || '',
+            country: profileData.country || '',
+            zipCode: profileData.zipCode || '',
+            title: profileData.currentJobTitle || '',
+            company: profileData.currentCompany || '',
+            yearsOfExperience: profileData.experience ? profileData.experience.replace(' years', '') : '',
+            education: profileData.education || '',
+            linkedinProfile: profileData.linkedinUrl || '',
+            githubProfile: profileData.githubUrl || '',
+            portfolioWebsite: profileData.portfolioUrl || '',
+            // Keep other fields with defaults
             languages: profileData.languages || [],
             frameworks: profileData.frameworks || [],
             databases: profileData.databases || [],
             tools: profileData.tools || [],
-            // Ensure strings are initialized
-            fullName: profileData.fullName || '',
-            phone: profileData.phone || '',
-            title: profileData.title || '',
-            bio: profileData.bio || '',
-            githubProfile: profileData.githubProfile || '',
-            linkedinProfile: profileData.linkedinProfile || '',
-            portfolioWebsite: profileData.portfolioWebsite || '',
-            preferredWorkLocation: profileData.preferredWorkLocation || '',
-            // Ensure select fields have valid values
-            workType: profileData.workType || 'Full Time',
-            experienceLevel: profileData.experienceLevel || 'Mid Level',
-            primaryRole: profileData.primaryRole || 'Frontend Developer',
-            // Ensure number fields are initialized
-            yearsOfExperience: profileData.yearsOfExperience || '',
-            // Ensure boolean fields are initialized
-            isCurrentlyEmployed: profileData.isCurrentlyEmployed || false,
-            isOpenToWork: profileData.isOpenToWork || false,
-            isRemoteOnly: profileData.isRemoteOnly || false
+          };
+
+          // Set the transformed profile data
+          setUserProfile(prev => ({
+            ...prev, // Keep default values
+            ...transformedData, // Override with transformed server data
+            email: user.email // Always use email from auth context
           }));
         }
 
@@ -243,7 +256,26 @@ const ProfilePage = () => {
     }
     
     // Remove sensitive fields
-    const { email, currentPassword, newPassword, confirmPassword, ...profileData } = userProfile;
+    const { email, currentPassword, newPassword, confirmPassword, ...rawProfileData } = userProfile;
+
+    // Transform frontend data to match backend UserProfileDTO format
+    const profileData = {
+      firstName: rawProfileData.fullName?.split(' ')[0] || '',
+      lastName: rawProfileData.fullName?.split(' ').slice(1).join(' ') || '',
+      phone: rawProfileData.phone || '',
+      address: rawProfileData.location || '',
+      city: rawProfileData.city || '',
+      state: rawProfileData.state || '',
+      country: rawProfileData.country || '',
+      zipCode: rawProfileData.zipCode || '',
+      currentJobTitle: rawProfileData.title || rawProfileData.primaryRole || '',
+      currentCompany: rawProfileData.company || '',
+      experience: rawProfileData.yearsOfExperience ? `${rawProfileData.yearsOfExperience} years` : '',
+      education: rawProfileData.education || '',
+      linkedinUrl: rawProfileData.linkedinProfile || '',
+      githubUrl: rawProfileData.githubProfile || '',
+      portfolioUrl: rawProfileData.portfolioWebsite || ''
+    };
 
     try {
       const updatePromise = fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
@@ -320,6 +352,18 @@ const ProfilePage = () => {
               Sign In to Continue
             </button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="dashboard">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Checking authentication...</p>
         </div>
       </div>
     );

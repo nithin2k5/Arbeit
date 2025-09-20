@@ -1,10 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../../context/AuthContext';
 import LogoutButton from '@/components/LogoutButton';
 import './page.css';
 
 export default function BusinessDashboard() {
+  const router = useRouter();
+  const { user, isLoading } = useAuth();
   const [activeTab, setActiveTab] = useState('jobs');
   const [showModal, setShowModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -91,15 +95,33 @@ export default function BusinessDashboard() {
   const [resumeLoading, setResumeLoading] = useState(true);
 
   useEffect(() => {
-    fetchJobs();
-    fetchApplications();
-    fetchCompanyInfo();
-  }, []);
+    if (!isLoading) {
+      if (!user) {
+        router.replace('/auth');
+        return;
+      }
+      if (user.role !== 'business') {
+        router.replace('/dashboard');
+        return;
+      }
+    }
+  }, [user, isLoading, router]);
+
+  useEffect(() => {
+    if (user && user.role === 'business') {
+      fetchJobs();
+      fetchApplications();
+      fetchCompanyInfo();
+    }
+  }, [user]);
 
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
+        method: 'GET',
+        credentials: 'include', // Include cookies for authentication
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');
       }
@@ -115,7 +137,9 @@ export default function BusinessDashboard() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+        credentials: 'include',
+      });
       if (!response.ok) {
         throw new Error('Failed to fetch applications');
       }
@@ -365,6 +389,18 @@ export default function BusinessDashboard() {
       alert('Failed to update application status');
     }
   };
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="business-page">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="business-page">
@@ -783,7 +819,10 @@ export default function BusinessDashboard() {
                   <div className="form-section">
                     <h3 className="form-section-title">✅ Requirements</h3>
                     <ul className="detail-list">
-                      {selectedJob.requirements.map((req, index) => (
+                      {(Array.isArray(selectedJob.requirements)
+                        ? selectedJob.requirements
+                        : (selectedJob.requirements || '').split(',').map(s => s.trim()).filter(s => s)
+                      ).map((req, index) => (
                         <li key={index}>{req}</li>
                       ))}
                     </ul>
@@ -792,7 +831,10 @@ export default function BusinessDashboard() {
                   <div className="form-section">
                     <h3 className="form-section-title">🎁 Benefits</h3>
                     <ul className="detail-list">
-                      {selectedJob.benefits.map((benefit, index) => (
+                      {(Array.isArray(selectedJob.benefits)
+                        ? selectedJob.benefits
+                        : (selectedJob.benefits || '').split(',').map(s => s.trim()).filter(s => s)
+                      ).map((benefit, index) => (
                         <li key={index}>{benefit}</li>
                       ))}
                     </ul>
@@ -801,7 +843,10 @@ export default function BusinessDashboard() {
                   <div className="form-section">
                     <h3 className="form-section-title">🤝 Hiring Process</h3>
                     <div className="hiring-steps">
-                      {selectedJob.hiringProcess.map((step, index) => (
+                      {(Array.isArray(selectedJob.hiringProcess)
+                        ? selectedJob.hiringProcess
+                        : (selectedJob.hiringProcess || '').split(',').map(s => s.trim()).filter(s => s)
+                      ).map((step, index) => (
                         <div key={index} className="hiring-step">
                           <span className="step-number">{index + 1}</span>
                           <span>{step}</span>
@@ -810,13 +855,13 @@ export default function BusinessDashboard() {
                     </div>
                   </div>
 
-                  {selectedJob.screeningQuestions.length > 0 && (
+                  {(Array.isArray(selectedJob.screeningQuestions) && selectedJob.screeningQuestions.length > 0) && (
                     <div className="form-section">
                       <h3 className="form-section-title">❓ Screening Questions</h3>
                       <div className="screening-questions-list">
                         {selectedJob.screeningQuestions.map((q, index) => (
                           <div key={index} className="question-item">
-                            <p className="question-text">{q.question}</p>
+                            <p className="question-text">{q.question || q}</p>
                             <span className="question-type">{q.type === 'boolean' ? 'Yes/No' : 'Text'}</span>
                           </div>
                         ))}

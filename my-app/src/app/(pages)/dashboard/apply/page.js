@@ -125,7 +125,10 @@ function ApplyForm() {
           <section className="detail-section">
             <h2>Requirements</h2>
             <ul className="requirements-list">
-              {job.requirements.map((req, index) => (
+              {(Array.isArray(job.requirements)
+                ? job.requirements
+                : (job.requirements || '').split(',').map(s => s.trim()).filter(s => s)
+              ).map((req, index) => (
                 <li key={index}>{req}</li>
               ))}
             </ul>
@@ -135,7 +138,10 @@ function ApplyForm() {
             <section className="detail-section">
               <h2>Benefits</h2>
               <ul className="benefits-list">
-                {job.benefits.map((benefit, index) => (
+                {(Array.isArray(job.benefits)
+                  ? job.benefits
+                  : (job.benefits || '').split(',').map(s => s.trim()).filter(s => s)
+                ).map((benefit, index) => (
                   <li key={index}>{benefit}</li>
                 ))}
               </ul>

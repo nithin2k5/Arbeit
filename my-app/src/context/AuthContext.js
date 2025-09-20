@@ -12,10 +12,24 @@ export function AuthProvider({children}) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
+                // Check if we have valid tokens by trying to refresh
                 const response = await refreshToken();
-                const data = await response.json();
                 if (response.ok) {
-                    setUser(data.user);
+                    // If refresh succeeds, get user data from a protected endpoint
+                    const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+                        credentials: 'include'
+                    });
+                    if (profileResponse.ok) {
+                        const profileData = await profileResponse.json();
+                        // Extract user info from profile data
+                        setUser({
+                            email: profileData.email,
+                            role: profileData.role,
+                            id: profileData.id,
+                            firstName: profileData.firstName,
+                            lastName: profileData.lastName
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Auth check failed:', error);
@@ -61,12 +75,21 @@ export function AuthProvider({children}) {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, Password: password }),
+                body: JSON.stringify({ email: email, password: password }),
+                credentials: 'include'
             });
 
             if (!response.ok) {
                 return response;
             }
+
+            const data = await response.json();
+            // Set user state after successful login
+            setUser({
+                email: data.email,
+                role: data.role,
+                id: data.userId
+            });
 
             return response;
         } catch(e) {
@@ -104,12 +127,20 @@ export function AuthProvider({children}) {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, Password: password }),
+                body: JSON.stringify({ email: email, password: password }),
             });
 
             if (!response.ok) {
                 return response;
             }
+
+            const data = await response.json();
+            // Set user state after successful registration
+            setUser({
+                email: data.email,
+                role: data.role,
+                id: data.userId
+            });
 
             return response;
         } catch(e) {
@@ -145,6 +176,68 @@ export function AuthProvider({children}) {
         }
     };
 
+    const loginBusiness = async(email, password) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password }),
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                return response;
+            }
+
+            const data = await response.json();
+            // Set user state after successful business login
+            setUser({
+                email: data.email,
+                role: data.role,
+                id: data.bid
+            });
+
+            return response;
+        } catch(e) {
+            return new Response(JSON.stringify({ error: 'Network error during business login' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    };
+
+    const registerBusiness = async (businessData) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: businessData.name,
+                    email: businessData.email,
+                    companyName: businessData.companyName,
+                    companyEmail: businessData.companyEmail,
+                    address: businessData.address,
+                    city: businessData.city,
+                    state: businessData.state,
+                    country: businessData.country,
+                    password: businessData.password
+                }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Business registration failed');
+            }
+
+            return response;
+        } catch (e) {
+            return new Response(JSON.stringify({ error: 'Network error during business registration' }), {
+                status: 500,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+    };
+
     const signInWithGoogle = async () => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google-signin`, {
@@ -170,9 +263,9 @@ export function AuthProvider({children}) {
     };
 
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, register, setUser, logout, signInWithGoogle }}>
+        <AuthContext.Provider value={{ user, isLoading, login, register, loginBusiness, registerBusiness, setUser, logout, signInWithGoogle }}>
             {children}
-        </AuthContext.Provider> 
+        </AuthContext.Provider>
     );
 }
 

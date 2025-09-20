@@ -1,5 +1,6 @@
 com/arbeit/backend/security/JwtUtils.class
 com/arbeit/backend/model/Company.class
+com/arbeit/backend/model/StringListConverter.class
 com/arbeit/backend/model/Application.class
 com/arbeit/backend/service/ProfileService.class
 com/arbeit/backend/model/Job.class
@@ -30,8 +31,8 @@ com/arbeit/backend/repository/JobRepository.class
 com/arbeit/backend/dto/JobDTO.class
 com/arbeit/backend/ArbeitsBackendApplication.class
 com/arbeit/backend/model/User.class
+com/arbeit/backend/model/StringListConverter$1.class
 com/arbeit/backend/repository/CompanyRepository.class
-com/arbeit/backend/config/CorsConfig$1.class
 com/arbeit/backend/dto/AuthRequest.class
 com/arbeit/backend/controller/BusinessProfileController.class
 com/arbeit/backend/security/JwtAuthenticationFilter.class

@@ -38,20 +38,20 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
                 // Public endpoints
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/auth/business/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/jobs").permitAll()
-                .requestMatchers(HttpMethod.POST, "/api/jobs").permitAll() // For fetching specific job
-                .requestMatchers(HttpMethod.POST, "/api/applications").permitAll()
-                .requestMatchers("/api/mentorship/**").permitAll()
-                .requestMatchers("/api/project/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/auth/business/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/jobs").permitAll()
+                .requestMatchers(HttpMethod.POST, "/jobs").permitAll() // For fetching specific job
+                .requestMatchers(HttpMethod.POST, "/applications").permitAll()
+                .requestMatchers("/mentorship/**").permitAll()
+                .requestMatchers("/project/**").permitAll()
 
                 // Business-only endpoints
-                .requestMatchers("/api/business/**").hasRole("BUSINESS")
+                .requestMatchers("/business/**").hasRole("BUSINESS")
 
                 // User-only endpoints (profiles, etc.)
-                .requestMatchers(HttpMethod.GET, "/api/profile").hasAnyRole("USER", "BUSINESS")
-                .requestMatchers(HttpMethod.PUT, "/api/profile").hasAnyRole("USER", "BUSINESS")
+                .requestMatchers(HttpMethod.GET, "/profile").hasAnyRole("USER", "BUSINESS")
+                .requestMatchers(HttpMethod.PUT, "/profile").hasAnyRole("USER", "BUSINESS")
 
                 // Admin endpoints (if needed in future)
                 // .requestMatchers("/api/admin/**").hasRole("ADMIN")
@@ -70,7 +70,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOriginPatterns(List.of("*")); // Use allowedOriginPatterns for credentials
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "http://localhost:3001")); // Allow specific origins
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);

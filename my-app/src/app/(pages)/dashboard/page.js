@@ -254,7 +254,10 @@ export default function Dashboard() {
                   </div>
                   <div className="job-footer">
                     <div className="tags">
-                      {(job.requirements || []).slice(0, 3).map((req, index) => (
+                      {(Array.isArray(job.requirements)
+                        ? job.requirements
+                        : (job.requirements || '').split(',').map(s => s.trim()).filter(s => s)
+                      ).slice(0, 3).map((req, index) => (
                         <span key={index} className="tag">{String(req)}</span>
                       ))}
                     </div>

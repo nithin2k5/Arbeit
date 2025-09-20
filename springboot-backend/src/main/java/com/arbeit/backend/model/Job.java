@@ -1,5 +1,7 @@
 package com.arbeit.backend.model;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,6 +40,8 @@ public class Job {
     private String requirements;
     private String benefits;
     private String qualification;
+
+    @Convert(converter = StringListConverter.class)
     private List<String> skillsRequired;
 
     // Salary Information
@@ -47,6 +51,7 @@ public class Job {
     private boolean hideSalary; // Whether to hide salary information
 
     // Additional Information
+    @Convert(converter = StringListConverter.class)
     private List<String> screeningQuestions;
     private String hiringProcess;
     private String applicationInstructions;

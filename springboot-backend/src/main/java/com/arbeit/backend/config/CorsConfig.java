@@ -21,17 +21,18 @@ public class CorsConfig {
     @Value("${app.cors.allow-credentials}")
     private boolean allowCredentials;
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins(allowedOrigins.split(","))
-                        .allowedMethods(allowedMethods.split(","))
-                        .allowedHeaders(allowedHeaders)
-                        .allowCredentials(allowCredentials);
-            }
-        };
-    }
+    // CORS is now configured in SecurityConfig to avoid conflicts
+    // @Bean
+    // public WebMvcConfigurer corsConfigurer() {
+    //     return new WebMvcConfigurer() {
+    //         @Override
+    //         public void addCorsMappings(CorsRegistry registry) {
+    //             registry.addMapping("/**")
+    //                     .allowedOrigins(allowedOrigins.split(","))
+    //                     .allowedMethods(allowedMethods.split(","))
+    //                     .allowedHeaders(allowedHeaders)
+    //                     .allowCredentials(allowCredentials);
+    //         }
+    //     };
+    // }
 }
