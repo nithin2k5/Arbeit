@@ -15,20 +15,47 @@ export function AuthProvider({children}) {
                 // Check if we have valid tokens by trying to refresh
                 const response = await refreshToken();
                 if (response.ok) {
-                    // If refresh succeeds, get user data from a protected endpoint
-                    const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+                    // First, try to get user data from regular profile endpoint
+                    let profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
                         credentials: 'include'
                     });
+
+                    let profileData = null;
+                    let userRole = null;
+
                     if (profileResponse.ok) {
-                        const profileData = await profileResponse.json();
-                        // Extract user info from profile data
-                        setUser({
-                            email: profileData.email,
-                            role: profileData.role,
-                            id: profileData.id,
-                            firstName: profileData.firstName,
-                            lastName: profileData.lastName
+                        profileData = await profileResponse.json();
+                        userRole = profileData.role;
+                    } else {
+                        // If regular profile fails, try business profile
+                        const businessProfileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/profile`, {
+                            credentials: 'include'
                         });
+                        if (businessProfileResponse.ok) {
+                            profileData = await businessProfileResponse.json();
+                            userRole = 'business'; // Business profile doesn't return role, so we set it
+                        }
+                    }
+
+                    if (profileData && userRole) {
+                        // Extract user info from profile data
+                        if (userRole === 'business') {
+                            setUser({
+                                email: profileData.companyEmail,
+                                role: userRole,
+                                id: profileData.bid,
+                                companyName: profileData.companyName,
+                                name: profileData.name
+                            });
+                        } else {
+                            setUser({
+                                email: profileData.email,
+                                role: userRole,
+                                id: profileData.id,
+                                firstName: profileData.firstName,
+                                lastName: profileData.lastName
+                            });
+                        }
                     }
                 }
             } catch (error) {
@@ -48,21 +75,20 @@ export function AuthProvider({children}) {
             intervalId = setInterval(async () => {
                 try {
                     const response = await refreshToken();
-                    const data = await response.json();
                     if (!response.ok) {
                         clearInterval(intervalId);
                         setUser(null);
                         router.replace('/');
-                    } else {
-                        setUser(data.user);
                     }
+                    // If refresh is successful, we don't need to update user state
+                    // as the cookies are automatically updated by the server
                 } catch (error) {
                     console.error('Token refresh failed:', error);
                     clearInterval(intervalId);
                     setUser(null);
                     router.replace('/');
                 }
-            }, 14 * 1000);
+            }, 4 * 60 * 1000); // Refresh every 4 minutes (tokens expire in 5 minutes)
         }
 
         return () => {
@@ -153,11 +179,21 @@ export function AuthProvider({children}) {
 
     const refreshToken = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`, {
+            // Try regular user refresh first
+            let response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include'
             });
+
+            // If regular refresh fails, try business refresh
+            if (!response.ok) {
+                response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/refresh`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                });
+            }
 
             if (!response.ok) {
                 return new Response(JSON.stringify({ error: 'Token refresh failed' }), {

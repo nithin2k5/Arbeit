@@ -199,8 +199,12 @@ export default function BusinessDashboard() {
         salaryMin: parseFloat(newJob.salaryMin) || 0,
         salaryMax: parseFloat(newJob.salaryMax) || 0,
         hideSalary: newJob.hideSalary,
-        screeningQuestions: newJob.screeningQuestions,
-        hiringProcess: newJob.hiringProcess,
+        // Convert screening questions from objects to strings (just the question text)
+        screeningQuestions: newJob.screeningQuestions
+          .filter(q => q.question && q.question.trim())
+          .map(q => q.question.trim()),
+        // Convert hiring process array to comma-separated string
+        hiringProcess: Array.isArray(newJob.hiringProcess) ? newJob.hiringProcess.join(', ') : newJob.hiringProcess,
         additionalInfo: newJob.additionalInfo
       };
 

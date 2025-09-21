@@ -19,6 +19,10 @@ public class AuthResponse {
         this.userId = userId;
         this.email = email;
         this.role = role;
+        // For business users, also set bid field
+        if ("business".equals(role)) {
+            this.bid = userId;
+        }
     }
 
     // Temporarily removed duplicate constructor
