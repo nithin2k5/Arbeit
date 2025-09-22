@@ -1,0 +1,27 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Uploads and temporary files
+uploads/
+*.tmp
+
+# Environment specific
+application-local.properties
+application-dev.properties
+application-prod.properties

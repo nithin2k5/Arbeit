@@ -1,0 +1,31 @@
+# Cookie files
+business_cookies.txt
+user_cookies.txt
+cookies.txt
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Node modules
+node_modules/
+
+# Build artifacts
+*.jar
+*.war
+*.ear
+
+# Logs
+*.log
+logs/
+
+# Environment specific files
+.env
+.env.local
+.env.development
+.env.production
