@@ -72,7 +72,8 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/refresh")
+    // <<< THIS WAS THE LINE TO CHANGE
+    @GetMapping("/refresh")
     public ResponseEntity<?> refreshToken(@CookieValue(value = "refreshToken", required = false) String refreshToken,
                                          HttpServletResponse response) {
         try {
