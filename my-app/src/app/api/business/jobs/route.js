@@ -5,7 +5,7 @@ import { verifyAccessToken } from '../../../../config/jwt';
 
 // Helper function to verify business auth
 async function verifyBusinessAuth() {
-    const cookieStore = cookies();
+    const cookieStore = await cookies();
     const accessToken = cookieStore.get('accessToken');
 
     if (!accessToken) {
@@ -13,7 +13,7 @@ async function verifyBusinessAuth() {
     }
 
     const decoded = verifyAccessToken(accessToken.value);
-    
+
     if (!decoded || decoded.role !== 'business') {
         throw new Error('Unauthorized');
     }

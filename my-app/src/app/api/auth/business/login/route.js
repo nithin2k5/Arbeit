@@ -47,7 +47,7 @@ export async function POST(request) {
         });
 
         // Get cookies instance
-        const cookieStore = cookies();
+        const cookieStore = await cookies();
 
         // Set access token cookie
         cookieStore.set('accessToken', accessToken, {

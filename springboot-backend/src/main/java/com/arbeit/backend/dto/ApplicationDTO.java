@@ -2,6 +2,7 @@ package com.arbeit.backend.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import org.springframework.web.multipart.MultipartFile;
 
 public class ApplicationDTO {
 
@@ -20,7 +21,7 @@ public class ApplicationDTO {
     @NotBlank(message = "Cover letter is required")
     private String coverLetter;
 
-    private String resume; // Base64 encoded resume data
+    private MultipartFile resume; // Resume file upload
 
     // Additional fields that might be collected
     private String experience;
@@ -74,11 +75,11 @@ public class ApplicationDTO {
         this.coverLetter = coverLetter;
     }
 
-    public String getResume() {
+    public MultipartFile getResume() {
         return resume;
     }
 
-    public void setResume(String resume) {
+    public void setResume(MultipartFile resume) {
         this.resume = resume;
     }
 

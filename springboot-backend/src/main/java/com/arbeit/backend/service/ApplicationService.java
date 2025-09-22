@@ -115,22 +115,23 @@ public class ApplicationService {
         return applicationRepository.findByUserId(userId);
     }
 
-    private String saveResumeToFileSystem(String resumeData, String userId) throws IOException {
-        // Assuming resumeData is Base64 encoded PDF
-        byte[] resumeBytes = Base64.getDecoder().decode(resumeData);
-
+    private String saveResumeToFileSystem(MultipartFile resumeFile, String userId) throws IOException {
         // Create uploads/resumes directory if it doesn't exist
         Path uploadDir = Paths.get("uploads", "resumes");
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }
 
-        // Create file path
-        String fileName = userId + "_resume.pdf";
+        // Create file path with original file extension
+        String originalFileName = resumeFile.getOriginalFilename();
+        String fileExtension = originalFileName != null && originalFileName.contains(".")
+            ? originalFileName.substring(originalFileName.lastIndexOf("."))
+            : ".pdf";
+        String fileName = userId + "_resume" + fileExtension;
         Path filePath = uploadDir.resolve(fileName);
 
         // Save file to file system
-        Files.copy(new java.io.ByteArrayInputStream(resumeBytes), filePath, StandardCopyOption.REPLACE_EXISTING);
+        Files.copy(resumeFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
         return fileName;
     }
