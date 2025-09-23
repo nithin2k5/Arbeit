@@ -81,9 +81,9 @@ docker-compose logs mysql
 
 Once deployed, your application will be available at:
 
-- **Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:3003
 - **Backend API**: http://localhost:8080/api
-- **MySQL Database**: localhost:3306
+- **MySQL Database**: localhost:3308
 
 ## Environment Variables
 
