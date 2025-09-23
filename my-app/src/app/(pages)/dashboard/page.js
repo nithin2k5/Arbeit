@@ -23,7 +23,7 @@ export default function Dashboard() {
     try {
       setLoading(true);
       console.log('Fetching jobs...');
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`);
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`);
       console.log('Response status:', response.status);
       if (!response.ok) {
         throw new Error('Failed to fetch jobs');

@@ -1,0 +1,86 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: arbeit_mysql_prod
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-arbeit}
+      MYSQL_USER: ${MYSQL_USER:-arbeit_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./springboot-backend/sample_data.sql:/docker-entrypoint-initdb.d/sample_data.sql:ro
+    networks:
+      - arbeit_network_prod
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+    command: --default-authentication-plugin=mysql_native_password
+
+  # Spring Boot Backend
+  backend:
+    build:
+      context: ./springboot-backend
+      dockerfile: Dockerfile
+    container_name: arbeit_backend_prod
+    restart: unless-stopped
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-arbeit}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-arbeit_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
+      ACCESS_TOKEN: ${ACCESS_TOKEN}
+      REFRESH_TOKEN: ${REFRESH_TOKEN}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+    ports:
+      - "${BACKEND_PORT:-8080}:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    volumes:
+      - backend_uploads:/app/uploads
+    networks:
+      - arbeit_network_prod
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Next.js Frontend
+  frontend:
+    build:
+      context: ./my-app
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    container_name: arbeit_frontend_prod
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - arbeit_network_prod
+
+volumes:
+  mysql_data:
+    driver: local
+  backend_uploads:
+    driver: local
+
+networks:
+  arbeit_network_prod:
+    driver: bridge

@@ -118,7 +118,7 @@ export default function BusinessDashboard() {
   const fetchJobs = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/jobs`, {
         method: 'GET',
         credentials: 'include', // Include cookies for authentication
       });
@@ -137,7 +137,7 @@ export default function BusinessDashboard() {
 
   const fetchApplications = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/applications`, {
         credentials: 'include',
       });
       if (!response.ok) {
@@ -152,7 +152,7 @@ export default function BusinessDashboard() {
 
   const fetchCompanyInfo = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/profile`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/profile`, {
         credentials: 'include'
       });
       if (response.ok) {
@@ -208,7 +208,7 @@ export default function BusinessDashboard() {
         additionalInfo: newJob.additionalInfo
       };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -253,7 +253,7 @@ export default function BusinessDashboard() {
   const handleDelete = async (job) => {
     const jobId = job.jobId;
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/jobs`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
@@ -280,7 +280,7 @@ export default function BusinessDashboard() {
     try {
       const newStatus = job.status === 'Active' ? 'Closed' : 'Active';
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/jobs`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -366,7 +366,7 @@ export default function BusinessDashboard() {
 
   const handleUpdateStatus = async (applicationId, status) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/applications`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'

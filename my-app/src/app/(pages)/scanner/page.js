@@ -134,7 +134,7 @@ export default function ScannerPage() {
       }
 
       // Send to backend for analysis
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/scanner/analyze`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/scanner/analyze`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

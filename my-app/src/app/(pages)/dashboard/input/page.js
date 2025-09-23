@@ -81,7 +81,7 @@ export default function MentorshipInputPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/mentorship/roadmap`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/mentorship/roadmap`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

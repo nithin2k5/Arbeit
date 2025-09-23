@@ -16,7 +16,7 @@ export function AuthProvider({children}) {
                 const response = await refreshToken();
                 if (response.ok) {
                     // First, try to get user data from regular profile endpoint
-                    let profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+                    let profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
                         credentials: 'include'
                     });
 
@@ -28,7 +28,7 @@ export function AuthProvider({children}) {
                         userRole = profileData.role;
                     } else {
                         // If regular profile fails, try business profile
-                        const businessProfileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/business/profile`, {
+                        const businessProfileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/business/profile`, {
                             credentials: 'include'
                         });
                         if (businessProfileResponse.ok) {
@@ -98,7 +98,7 @@ export function AuthProvider({children}) {
 
     const login = async(email, password) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, password: password }),
@@ -128,7 +128,7 @@ export function AuthProvider({children}) {
 
     const logout = async() => {
         try{
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
@@ -150,7 +150,7 @@ export function AuthProvider({children}) {
 
     const register = async(email, password) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/register`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, password: password }),
@@ -180,7 +180,7 @@ export function AuthProvider({children}) {
     const refreshToken = async () => {
         try {
             // Try regular user refresh first
-            let response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/refresh`, {
+            let response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`, {
                 method: "GET",
                 headers: { "Content-Type": "application/json" },
                 credentials: 'include'
@@ -188,7 +188,7 @@ export function AuthProvider({children}) {
 
             // If regular refresh fails, try business refresh
             if (!response.ok) {
-                response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/refresh`, {
+                response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/business/refresh`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     credentials: 'include'
@@ -214,7 +214,7 @@ export function AuthProvider({children}) {
 
     const loginBusiness = async(email, password) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/login`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/business/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email: email, password: password }),
@@ -244,7 +244,7 @@ export function AuthProvider({children}) {
 
     const registerBusiness = async (businessData) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/register`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/business/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -276,7 +276,7 @@ export function AuthProvider({children}) {
 
     const signInWithGoogle = async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google-signin`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/google-signin`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

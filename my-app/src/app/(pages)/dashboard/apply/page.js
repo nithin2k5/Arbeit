@@ -19,7 +19,7 @@ function ApplyForm() {
 
   const fetchJobDetails = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/jobs`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -45,7 +45,7 @@ function ApplyForm() {
     formData.append('jobId', jobId);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/applications`, {
         method: 'POST',
         body: formData // Send as FormData instead of JSON
       });

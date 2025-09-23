@@ -95,7 +95,7 @@ const ProfilePage = () => {
 
       try {
         // Fetch profile
-        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+        const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
           credentials: 'include'
         });
         if (profileResponse.ok) {
@@ -132,7 +132,7 @@ const ProfilePage = () => {
         }
 
         // Fetch applications
-        const applicationsResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications`, {
+        const applicationsResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/applications`, {
           credentials: 'include'
         });
         if (applicationsResponse.ok) {
@@ -278,7 +278,7 @@ const ProfilePage = () => {
     };
 
     try {
-      const updatePromise = fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/profile`, {
+      const updatePromise = fetch(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -625,7 +625,7 @@ const ProfilePage = () => {
                           <p><strong>Applied:</strong> {new Date(application.appliedDate).toLocaleDateString()}</p>
                           {application.resumeId && (
                             <a
-                              href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/${application._id}/resume`}
+                              href={`${process.env.NEXT_PUBLIC_API_URL}/applications/${application._id}/resume`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="view-resume-btn"
@@ -661,7 +661,7 @@ const ProfilePage = () => {
                     <span>Resume for Job #{app.jobId}</span>
                     <div className="resume-actions">
                       <a
-                        href={`${process.env.NEXT_PUBLIC_BACKEND_URL}/applications/${app._id}/resume`}
+                        href={`${process.env.NEXT_PUBLIC_API_URL}/applications/${app._id}/resume`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="view-btn"

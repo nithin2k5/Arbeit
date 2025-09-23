@@ -52,7 +52,7 @@ const Bauthen = () => {
         setLoading(true);
 
         // Register business using Spring Boot backend
-        const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/business/register`, {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/business/register`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
