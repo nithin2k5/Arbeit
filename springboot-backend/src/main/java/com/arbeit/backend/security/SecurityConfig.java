@@ -45,6 +45,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/applications").permitAll()
                 .requestMatchers("/mentorship/**").permitAll()
                 .requestMatchers("/project/**").permitAll()
+                .requestMatchers("/actuator/health").permitAll() // Health check endpoint
 
                 // Business-only endpoints
                 .requestMatchers("/business/**").hasRole("BUSINESS")
