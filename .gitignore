@@ -11,6 +11,7 @@ cookies.txt
 # OS
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
 
 # Node modules
 node_modules/
