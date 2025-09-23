@@ -1,0 +1,49 @@
+# Node modules
+node_modules/
+*/node_modules/
+
+# Build artifacts
+*/target/
+*.jar
+*.war
+
+# IDE files
+.vscode/
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Logs
+*.log
+logs/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Documentation
+README.md
+DOCKER_DEPLOYMENT.md
+*.md
+
+# Docker files
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+
+# Package files (will be copied individually by Dockerfiles)
+package*.json
+pom.xml

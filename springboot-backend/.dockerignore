@@ -1,0 +1,15 @@
+Dockerfile
+.dockerignore
+target/
+*.log
+*.tmp
+README.md
+README_MySQL_Setup.md
+.git
+.gitignore
+*.md
+backend.log
+sample_data.sql
+clean_sample_data.sql
+complete_sample_data.sql
+fixed_sample_data.sql
